@@ -77,6 +77,7 @@ export class TodoService {
           : { tags: todo.attributes.tags },
     };
 
-    return this.todosRepository.save(todoToBeUpdated);
+    const updatedTodo = await this.todosRepository.save(todoToBeUpdated);
+    return updatedTodo;
   }
 }
