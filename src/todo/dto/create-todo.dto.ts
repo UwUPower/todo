@@ -105,20 +105,10 @@ export class CreateTodoResponseDto {
   priority: TodoPriority;
 
   @ApiProperty({
-    type: [String],
-    description:
-      'Tags associated with the todo item (derived from attributes).',
-    example: ['work', 'important'],
+    description: 'Attributes json object containing tag',
+    example: { tags: ['work', 'important'] },
   })
-  @Expose({ name: 'tags' })
-  @Transform(({ value }) => {
-    if (value && value.tags) {
-      return value.tags;
-    } else {
-      return [];
-    }
-  })
-  attributes?: Record<string, any>;
+  attributes: any;
 
   @Exclude()
   id?: number;

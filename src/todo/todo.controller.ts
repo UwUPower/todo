@@ -52,16 +52,16 @@ export class TodoController {
   @ApiResponse({
     status: 201,
     description: 'The todo has been successfully created.',
-    type: CreateTodoRequestDto,
+    type: CreateTodoResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 400, description: 'Invalid input.' })
   async create(
-    @Body() createTodoDto: CreateTodoRequestDto,
+    @Body() createTodoRequestDto: CreateTodoRequestDto,
     @Req() req: Request,
   ): Promise<CreateTodoResponseDto> {
     const user = req.user as User;
-    const todo = await this.todoService.create(createTodoDto, user.id);
+    const todo = await this.todoService.create(createTodoRequestDto, user.id);
     return plainToInstance(CreateTodoResponseDto, todo);
   }
 
@@ -105,6 +105,7 @@ export class TodoController {
     type: String,
     description:
       'Comma-separated list of fields to return. Allowed options: uuid, name, description, dueDate, status, priority, tags',
+    example: 'name,uuid,tags',
   })
   @ApiResponse({
     status: 200,

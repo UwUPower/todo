@@ -12,6 +12,7 @@ import { CreateTodoRequestDto } from './dto/create-todo.dto';
 import { UpdateTodoRequestDto } from './dto/update-todo.dto';
 import { UserService } from 'src/user/user.service';
 import { ToDoQueryEnum } from './enum/todo-query-enum';
+import { GetTodosRequestDto } from './dto/get-todos.dto';
 
 @Injectable()
 export class TodoService {
@@ -37,11 +38,15 @@ export class TodoService {
         : { tags: [] },
     });
 
-    const savedTodo = await this.todosRepository.save(newTodo);
+    const createdTodo = await this.todosRepository.save(newTodo);
 
-    await this.userTodoService.create(userId, savedTodo.id, UserTodoRole.OWNER);
+    await this.userTodoService.create(
+      userId,
+      createdTodo.id,
+      UserTodoRole.OWNER,
+    );
 
-    return savedTodo;
+    return createdTodo;
   }
 
   async update(
