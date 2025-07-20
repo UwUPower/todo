@@ -4,24 +4,30 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { TodoModule } from './todo/todo.module';
+import { UserTodoModule } from './user-todo/user-todo.module';
+import { Todo } from './todo/entities/todo.entity';
+import { UserTodo } from './user-todo/entities/user-todo.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.get<string>('DATABASE_URL'),
-        entities: [User],
-        synchronize: true, // For simplicity, automigrate by ORM is enabled, however, in a real production app, it is not preferable
-        // logging: true,  // enabling sql query log
-      }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DATABASE_HOST || 'localhost',
+      port: parseInt(process.env.DATABASE_PORT || '5432', 5432),
+      username: process.env.DATABASE_USER || 'user',
+      password: process.env.DATABASE_PASSWORD || 'password',
+      database: process.env.DATABASE_NAME || 'todo',
+      entities: [User, Todo, UserTodo],
+      synchronize: true, // enable db automigration inferred from ORM. It should be disabled in a real production app
+      logging: true, // enabling sql query log
     }),
     AuthModule,
     UserModule,
+    UserTodoModule,
+    TodoModule,
   ],
   controllers: [],
   providers: [],

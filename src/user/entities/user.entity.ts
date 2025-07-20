@@ -1,5 +1,6 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
+import { UserTodo } from 'src/user-todo/entities/user-todo.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -14,4 +15,7 @@ export class User extends BaseEntity {
 
   @Column({ length: 255 })
   password: string;
+
+  @OneToMany(() => UserTodo, (userTodo) => userTodo.user)
+  userTodos: UserTodo[];
 }
