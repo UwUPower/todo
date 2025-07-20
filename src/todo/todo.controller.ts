@@ -8,6 +8,9 @@ import {
   ClassSerializerInterceptor,
   Patch,
   Param,
+  Get,
+  Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import {
@@ -21,6 +24,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -29,6 +33,8 @@ import {
   UpdateTodoRequestDto,
   UpdateTodoResponseDto,
 } from './dto/update-todo.dto';
+import { GetTodoResponseDto } from './dto/get-todo.dto';
+import { ToDoQueryEnum } from './enum/todo-query-enum';
 
 @ApiTags('Todo')
 @ApiBearerAuth('JWT-auth')
@@ -89,5 +95,55 @@ export class TodoController {
       user.id,
     );
     return plainToInstance(UpdateTodoResponseDto, todo);
+  }
+
+  @Get(':uuid')
+  @ApiParam({ name: 'uuid', description: 'UUID of the todo item to retrieve.' })
+  @ApiQuery({
+    name: 'fields',
+    required: false,
+    type: String,
+    description:
+      'Comma-separated list of fields to return. Allowed options: uuid, name, description, dueDate, status, priority, tags',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Details of the todo item.',
+    type: GetTodoResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid selction fields.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Forbidden: User does not have permission to access this todo.',
+  })
+  @ApiResponse({ status: 404, description: 'Todo not found.' })
+  async findOne(
+    @Param('uuid') uuid: string,
+    @Req() req: Request,
+    @Query('fields') fields?: string,
+  ): Promise<Partial<GetTodoResponseDto>> {
+    const user = req.user as User;
+    const allowedFields = Object.values(ToDoQueryEnum);
+
+    let fieldsArray: string[] = [];
+    if (fields) {
+      fieldsArray = fields.split(',');
+      const invalidFields = fieldsArray.filter(
+        (field) => !allowedFields.includes(field as ToDoQueryEnum),
+      );
+      if (invalidFields.length > 0) {
+        throw new BadRequestException(
+          `Invalid field(s) requested: ${invalidFields.join(', ')}. Allowed fields are: ${allowedFields.join(', ')}.`,
+        );
+      }
+    }
+    const todoPartial = await this.todoService.findOneByUuid(
+      uuid,
+      user.id,
+      fieldsArray,
+    );
+    return plainToInstance(GetTodoResponseDto, todoPartial);
   }
 }
