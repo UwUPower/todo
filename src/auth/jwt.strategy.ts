@@ -1,15 +1,16 @@
+// src/auth/jwt.strategy.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Strategy, ExtractJwt } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
-import { User } from '../user/entities/user.entity';
+import { User } from '../user/entities/user.entity'; // For type hinting req.user
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private configService: ConfigService,
-    private usersService: UserService,
+    private userService: UserService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -18,11 +19,26 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: number; email: string }): Promise<User> {
-    const user = await this.usersService.findOneById(payload.sub);
-    if (!user) {
-      throw new UnauthorizedException('User not found.');
+  async validate(payload: any): Promise<Partial<User>> {
+    // Expect 'uuid' in the payload, not 'sub'
+    const userUuidFromToken = payload.uuid;
+
+    if (!userUuidFromToken) {
+      throw new UnauthorizedException('User UUID not found in token.');
     }
-    return user;
+
+    // Find the user by UUID to get their internal ID and other details
+    const user = await this.userService.findOneByUuid(userUuidFromToken);
+
+    if (!user) {
+      throw new UnauthorizedException('User not found or invalid token.');
+    }
+
+    // Return the internal ID and UUID to be attached to req.user for services
+    return {
+      id: user.id,
+      uuid: user.uuid,
+      email: user.email,
+    };
   }
 }

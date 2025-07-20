@@ -19,5 +19,5 @@ export class LoginRequestDto {
 
 export class LoginResponseDto {
   @ApiProperty({ description: 'The JWT access token for authentication.' })
-  access_token: string;
+  accessToken: string;
 }

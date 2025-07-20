@@ -20,10 +20,7 @@ export class AuthController {
   async login(
     @Body() loginRequestDto: LoginRequestDto,
   ): Promise<LoginResponseDto> {
-    const { access_token } = await this.authService.login(
-      loginRequestDto.email,
-      loginRequestDto.password,
-    );
-    return plainToInstance(LoginResponseDto, { access_token });
+    const { accessToken } = await this.authService.login(loginRequestDto);
+    return plainToInstance(LoginResponseDto, { accessToken });
   }
 }

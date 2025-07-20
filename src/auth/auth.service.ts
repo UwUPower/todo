@@ -1,7 +1,10 @@
+// src/auth/auth.service.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
+import { LoginRequestDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
+// No need to import User entity here, just work with what validateUser returns
 
 @Injectable()
 export class AuthService {
@@ -13,21 +16,24 @@ export class AuthService {
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.userService.findOneByEmail(email);
     if (user && (await bcrypt.compare(pass, user.password))) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...result } = user;
-      return result;
+      return { id: user.id, uuid: user.uuid, email: user.email };
     }
     return null;
   }
 
-  async login(email: string, password_plain: string) {
-    const user = await this.validateUser(email, password_plain);
+  async login(
+    loginRequestDto: LoginRequestDto,
+  ): Promise<{ accessToken: string }> {
+    const user = await this.validateUser(
+      loginRequestDto.email,
+      loginRequestDto.password,
+    );
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const payload = { email: user.email, sub: user.id };
+    const payload = { uuid: user.uuid, email: user.email };
     return {
-      access_token: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload),
     };
   }
 }
