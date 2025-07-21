@@ -266,7 +266,6 @@ export class TodoController {
   async findOneUserRole(
     @Param('uuid') uuid: string,
     @Req() req: Request,
-    @Query('fields') fields?: string,
   ): Promise<GetUserTodoRoleResponseDto> {
     const user = req.user as User;
     const todoPartial = await this.todoService.findOneUserRole(uuid, user.id);

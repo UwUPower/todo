@@ -77,14 +77,21 @@ $ npm run start:prod
 
 ## Run tests
 
-### run test
-```bash
+### run unit test
+```
 npm run test
 ```
 
-### run test with coverage report
-```bash
+### run unit test with coverage report
+```
 npm run test:cov
+```
+
+### run integration tests
+start the database and api server first
+```
+pip install request
+
 ```
 
 ## Swagger docs
