@@ -72,7 +72,10 @@ export class TodoService {
       throw new NotFoundException(`Todo with UUID "${uuid}" not found.`);
     }
 
-    const userTodo = await this.userTodoService.findOne(userId, todo.id);
+    const userTodo = await this.userTodoService.getTodoByUserIdAndTodoId(
+      userId,
+      todo.id,
+    );
     if (
       !userTodo ||
       (userTodo.role !== UserTodoRole.OWNER &&
@@ -115,7 +118,10 @@ export class TodoService {
 
     const todoId = todoIdObject.id;
 
-    const userTodo = await this.userTodoService.findOne(userId, todoId);
+    const userTodo = await this.userTodoService.getTodoByUserIdAndTodoId(
+      userId,
+      todoId,
+    );
 
     if (!userTodo) {
       throw new ForbiddenException(
@@ -297,7 +303,10 @@ export class TodoService {
       throw new NotFoundException(`Todo with UUID "${uuid}" not found.`);
     }
 
-    const userTodo = await this.userTodoService.findOne(userId, todo.id);
+    const userTodo = await this.userTodoService.getTodoByUserIdAndTodoId(
+      userId,
+      todo.id,
+    );
     if (!userTodo || userTodo.role !== UserTodoRole.OWNER) {
       throw new ForbiddenException(
         'You do not have permission to update this todo.',
@@ -320,7 +329,10 @@ export class TodoService {
       throw new NotFoundException(`Todo with UUID "${todoUuid}" not found.`);
     }
 
-    const userTodo = await this.userTodoService.findOne(userId, todo.id);
+    const userTodo = await this.userTodoService.getTodoByUserIdAndTodoId(
+      userId,
+      todo.id,
+    );
     if (!userTodo || userTodo.role !== UserTodoRole.OWNER) {
       throw new ForbiddenException(
         'You do not have permission to update this todo.',
@@ -334,10 +346,11 @@ export class TodoService {
       );
     }
 
-    const existingPermission = await this.userTodoService.findOne(
-      invitedUser.id,
-      todo.id,
-    );
+    const existingPermission =
+      await this.userTodoService.getTodoByUserIdAndTodoId(
+        invitedUser.id,
+        todo.id,
+      );
     if (existingPermission) {
       throw new ConflictException(
         `User "${invitedUserEmail}" is already assigned to this todo.`,
@@ -360,7 +373,10 @@ export class TodoService {
       throw new NotFoundException(`Todo with UUID "${todoUuid}" not found.`);
     }
 
-    const userTodo = await this.userTodoService.findOne(userId, todo.id);
+    const userTodo = await this.userTodoService.getTodoByUserIdAndTodoId(
+      userId,
+      todo.id,
+    );
     if (!userTodo || userTodo.role !== UserTodoRole.OWNER) {
       throw new ForbiddenException(
         'You do not have permission to update this todo.',
@@ -389,7 +405,10 @@ export class TodoService {
       throw new NotFoundException(`Todo with UUID "${todoUuid}" not found.`);
     }
 
-    const userTodo = await this.userTodoService.findOne(userId, todo.id);
+    const userTodo = await this.userTodoService.getTodoByUserIdAndTodoId(
+      userId,
+      todo.id,
+    );
     if (!userTodo || userTodo.role !== UserTodoRole.OWNER) {
       throw new ForbiddenException(
         'You do not have permission to delete user from this todo',
@@ -425,7 +444,10 @@ export class TodoService {
 
     const todoId = todoIdObject.id;
 
-    const userTodo = await this.userTodoService.findOne(userId, todoId);
+    const userTodo = await this.userTodoService.getTodoByUserIdAndTodoId(
+      userId,
+      todoId,
+    );
 
     if (!userTodo) {
       throw new ForbiddenException(

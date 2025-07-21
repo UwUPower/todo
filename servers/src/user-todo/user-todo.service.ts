@@ -41,7 +41,10 @@ export class UserTodoService {
     return this.userTodoRepository.save(userTodo);
   }
 
-  async findOne(userId: number, todoId: number): Promise<UserTodo | null> {
+  async getTodoByUserIdAndTodoId(
+    userId: number,
+    todoId: number,
+  ): Promise<UserTodo | null> {
     return this.userTodoRepository.findOne({ where: { userId, todoId } });
   }
 

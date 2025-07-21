@@ -131,7 +131,10 @@ export class TodoDescriptionService {
         return false;
       }
 
-      const userTodo = await this.userTodoService.findOne(user.id, todo.id);
+      const userTodo = await this.userTodoService.getTodoByUserIdAndTodoId(
+        user.id,
+        todo.id,
+      );
       if (!userTodo) {
         this.logger.warn(
           `WS Auth failed: User ${user.id} has no permission for todo ${todoUuid})`,

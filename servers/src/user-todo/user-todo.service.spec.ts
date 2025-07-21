@@ -138,7 +138,10 @@ describe('UserTodoService', () => {
     it('should return a user-todo relation if found', async () => {
       (userTodoRepository.findOne as jest.Mock).mockResolvedValue(mockUserTodo);
 
-      const result = await service.findOne(mockUserId, mockTodoId);
+      const result = await service.getTodoByUserIdAndTodoId(
+        mockUserId,
+        mockTodoId,
+      );
 
       expect(userTodoRepository.findOne).toHaveBeenCalledWith({
         where: { userId: mockUserId, todoId: mockTodoId },
@@ -149,7 +152,10 @@ describe('UserTodoService', () => {
     it('should return null if user-todo relation not found', async () => {
       (userTodoRepository.findOne as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.findOne(mockUserId, mockTodoId);
+      const result = await service.getTodoByUserIdAndTodoId(
+        mockUserId,
+        mockTodoId,
+      );
 
       expect(userTodoRepository.findOne).toHaveBeenCalledWith({
         where: { userId: mockUserId, todoId: mockTodoId },
