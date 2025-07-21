@@ -369,6 +369,6 @@ export class TodoService {
       );
     }
 
-    await this.userTodoService.updateRole(userId, todo.id, newRole);
+    await this.userTodoService.updateRole(targetUser.id, todo.id, newRole);
   }
 }
