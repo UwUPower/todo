@@ -40,6 +40,7 @@ import { GetTodoResponseDto } from './dto/get-todo.dto';
 import { ToDoQueryEnum } from './enums';
 import { InviteUserRequestDto } from './dto/invite-user.dto';
 import { UpdateUserRoleRequestDto } from './dto/update-user-role.dto';
+import { RemoveUserPermissionRequestDto } from './dto/romve-user-permission.dto';
 
 @ApiTags('Todo')
 @ApiBearerAuth('JWT-auth')
@@ -234,15 +235,51 @@ export class TodoController {
   @HttpCode(HttpStatus.OK)
   async updateUserRoleOnTodo(
     @Param('uuid') todoUuid: string,
-    @Body() body: UpdateUserRoleRequestDto,
+    @Body() updateUserRoleRequestDto: UpdateUserRoleRequestDto,
     @Req() req: Request,
   ): Promise<void> {
     const user = req.user as User;
     await this.todoService.updateUserRole(
       todoUuid,
       user.id,
-      body.email,
-      body.role,
+      updateUserRoleRequestDto.email,
+      updateUserRoleRequestDto.role,
+    );
+  }
+
+  @Delete(':uuid/user-permission')
+  @ApiParam({
+    name: 'uuid',
+    description: 'UUID of the todo item from which to remove user permission.',
+  })
+  @ApiBody({
+    type: RemoveUserPermissionRequestDto,
+    description: 'Email of the user whose permission is to be removed.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User permission successfully removed.',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden: Only the owner can remove user permissions.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Todo or target user/permission not found.',
+  })
+  @HttpCode(HttpStatus.OK)
+  async removeUserPermission(
+    @Param('uuid') todoUuid: string,
+    @Body() removeUserPermissionRequestDto: RemoveUserPermissionRequestDto,
+    @Req() req: Request,
+  ): Promise<void> {
+    const user = req.user as User;
+    await this.todoService.removeUserPermissionFromTodo(
+      todoUuid,
+      user.id,
+      removeUserPermissionRequestDto.email,
     );
   }
 }

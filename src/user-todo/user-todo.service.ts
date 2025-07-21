@@ -44,4 +44,11 @@ export class UserTodoService {
   async findOne(userId: number, todoId: number): Promise<UserTodo | null> {
     return this.userTodoRepository.findOne({ where: { userId, todoId } });
   }
+
+  async removeUserPermission(userId: number, todoId: number): Promise<void> {
+    const result = await this.userTodoRepository.softDelete({ userId, todoId });
+    if (result.affected === 0) {
+      throw new NotFoundException(`No permission has been deleted`);
+    }
+  }
 }

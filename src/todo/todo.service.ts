@@ -371,4 +371,33 @@ export class TodoService {
 
     await this.userTodoService.updateRole(targetUser.id, todo.id, newRole);
   }
+
+  async removeUserPermissionFromTodo(
+    todoUuid: string,
+    userId: number,
+    targetUserEmail: string,
+  ): Promise<void> {
+    const todo = await this.todosRepository.findOne({
+      where: { uuid: todoUuid, deletedAt: IsNull() },
+    });
+    if (!todo) {
+      throw new NotFoundException(`Todo with UUID "${todoUuid}" not found.`);
+    }
+
+    const userTodo = await this.userTodoService.findOne(userId, todo.id);
+    if (!userTodo || userTodo.role !== UserTodoRole.OWNER) {
+      throw new ForbiddenException(
+        'You do not have permission to delete user from this todo',
+      );
+    }
+
+    const targetUser = await this.userService.findOneByEmail(targetUserEmail);
+    if (!targetUser) {
+      throw new NotFoundException(
+        `Target user with email "${targetUserEmail}" not found.`,
+      );
+    }
+
+    await this.userTodoService.removeUserPermission(targetUser.id, todo.id);
+  }
 }
