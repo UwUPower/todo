@@ -1,4 +1,19 @@
+# Framework and language
+In my tech stack, TypeScript with Nestjs is the closest to C# ASP.NET
+- Strong type language
+- Built-in dependency injection
+- Built-in MVC pattern
+- 
+https://docs.nestjs.com/
 
+# Architectural diagram
+<img width="1266" height="659" alt="Screenshot 2025-07-22 at 00 44 51" src="https://github.com/user-attachments/assets/44e213df-88e3-4c9c-a67e-ba235b21f1e6" />
+
+The architecture is almost the same as "Operational Transform" section in the design document, except the following points:
+- servers and databases are deployed in docker rather than cloud
+- RabbitMQ is used instead of AWS eventbridge
+- No Nginx is implemented
+- The operational transform logic in frontend is only for indicative purpose, not production ready.
 
 # Prerequisite
 ```
