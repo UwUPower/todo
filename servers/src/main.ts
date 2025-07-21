@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { ApiAppModule } from './api.app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+async function bootstrapApi() {
+  const app = await NestFactory.create(ApiAppModule);
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // Automatically remove propeties not defined in a DTO
@@ -27,4 +27,8 @@ async function bootstrap() {
 
   await app.listen(3000);
 }
-bootstrap();
+
+
+if (process.env.APP === 'api') {
+  bootstrapApi();
+}

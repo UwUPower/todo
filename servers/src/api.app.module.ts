@@ -32,4 +32,4 @@ import { UserTodo } from './user-todo/entities/user-todo.entity';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class ApiAppModule {}
