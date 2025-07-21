@@ -10,5 +10,6 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package*.json ./
 
-EXPOSE 3000
+EXPOSE 3001
+EXPOSE 4001
 CMD ["npm", "run", "start:prod"]
