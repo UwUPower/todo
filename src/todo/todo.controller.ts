@@ -38,6 +38,7 @@ import {
 } from './dto/update-todo.dto';
 import { GetTodoResponseDto } from './dto/get-todo.dto';
 import { ToDoQueryEnum } from './enums';
+import { InviteUserRequestDto } from './dto/invite-user.dto';
 
 @ApiTags('Todo')
 @ApiBearerAuth('JWT-auth')
@@ -171,5 +172,42 @@ export class TodoController {
   ): Promise<void> {
     const user = req.user as User;
     await this.todoService.softDelete(uuid, user.id);
+  }
+
+  @Post(':uuid/invite')
+  @ApiParam({
+    name: 'uuid',
+    description: 'UUID of the todo',
+  })
+  @ApiBody({
+    type: InviteUserRequestDto,
+    description: 'Data for inviting a user to a todo with a specific role.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User successfully invited to todo.',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden: Only owner can invite users to a todo.',
+  })
+  @ApiResponse({ status: 404, description: 'Todo or invited user not found.' })
+  @ApiResponse({
+    status: 409,
+    description: 'User already assigned to this todo.',
+  })
+  async inviteUserToTodo(
+    @Param('uuid') todoUuid: string,
+    @Body() inviteUserRequestDto: InviteUserRequestDto,
+    @Req() req: Request,
+  ): Promise<void> {
+    const user = req.user as User;
+    await this.todoService.inviteUserToTodo(
+      todoUuid,
+      user.id,
+      inviteUserRequestDto.email,
+      inviteUserRequestDto.role,
+    );
   }
 }

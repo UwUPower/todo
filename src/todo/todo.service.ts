@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -298,5 +299,47 @@ export class TodoService {
     }
 
     await this.todosRepository.softDelete(todo.id);
+  }
+
+  async inviteUserToTodo(
+    todoUuid: string,
+    userId: number,
+    invitedUserEmail: string,
+    role: UserTodoRole,
+  ): Promise<void> {
+    const todo = await this.todosRepository.findOne({
+      where: { uuid: todoUuid, deletedAt: IsNull() },
+    });
+    if (!todo) {
+      throw new NotFoundException(`Todo with UUID "${todoUuid}" not found.`);
+    }
+
+    console.log({ userId });
+
+    const userTodo = await this.userTodoService.findOne(userId, todo.id);
+    if (!userTodo || userTodo.role !== UserTodoRole.OWNER) {
+      throw new ForbiddenException(
+        'You do not have permission to update this todo.',
+      );
+    }
+
+    const invitedUser = await this.userService.findOneByEmail(invitedUserEmail);
+    if (!invitedUser) {
+      throw new NotFoundException(
+        `User with email "${invitedUserEmail}" not found.`,
+      );
+    }
+
+    const existingPermission = await this.userTodoService.findOne(
+      invitedUser.id,
+      todo.id,
+    );
+    if (existingPermission) {
+      throw new ConflictException(
+        `User "${invitedUserEmail}" is already assigned to this todo.`,
+      );
+    }
+
+    await this.userTodoService.create(invitedUser.id, todo.id, role);
   }
 }
