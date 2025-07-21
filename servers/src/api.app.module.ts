@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
@@ -8,6 +8,8 @@ import { TodoModule } from './todo/todo.module';
 import { UserTodoModule } from './user-todo/user-todo.module';
 import { Todo } from './todo/entities/todo.entity';
 import { UserTodo } from './user-todo/entities/user-todo.entity';
+import { TodoPostEditConsumerModule } from './todo-post-edit-consumer/todo-post-edit-consumer.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -28,6 +30,7 @@ import { UserTodo } from './user-todo/entities/user-todo.entity';
     UserModule,
     UserTodoModule,
     TodoModule,
+    TodoPostEditConsumerModule,
   ],
   controllers: [],
   providers: [],

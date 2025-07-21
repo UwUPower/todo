@@ -435,4 +435,16 @@ export class TodoService {
 
     return { role: userTodo.role };
   }
+
+  async updateDescription(
+    todoId: number,
+    newDescription: string,
+  ): Promise<Todo> {
+    const todo = await this.todosRepository.findOne({ where: { id: todoId } });
+    if (!todo) {
+      throw new NotFoundException(`Todo with ID ${todoId} not found.`);
+    }
+    todo.description = newDescription;
+    return this.todosRepository.save(todo);
+  }
 }

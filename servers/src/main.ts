@@ -29,9 +29,9 @@ async function bootstrapApi() {
 
   const webclientPort = process.env.WEBCLIENT_PORT || '5001';
 
-  // Enable CORS for local frontend development
+  // Enable CORS for local development
   app.enableCors({
-    origin: `http://localhost:${webclientPort}`,
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   });

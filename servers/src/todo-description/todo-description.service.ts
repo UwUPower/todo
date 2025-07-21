@@ -5,8 +5,11 @@ import { UserService } from '../user/user.service';
 import { UserTodoService } from '../user-todo/user-todo.service';
 import { TodoService } from '../todo/todo.service';
 import * as jwt from 'jsonwebtoken';
-import { applyOperation, transformOperation } from './utils';
-import { DescriptionOperationInterface } from './interfaces';
+import {
+  applyOperation,
+  transformOperation,
+} from '../common/operationalTransform/utils';
+import { DescriptionOperationInterface } from '../common/operationalTransform/interfaces';
 import * as cassandra from 'cassandra-driver';
 import * as amqp from 'amqplib';
 import { v4 as uuidv4 } from 'uuid';

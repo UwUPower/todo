@@ -12,5 +12,5 @@ CREATE TABLE IF NOT EXISTS todo_description_ops (
     text_inserted text,
     length_deleted int,
     timestamp timestamp,
-    PRIMARY KEY ((todo_uuid), revision_number, op_id)
-) WITH CLUSTERING ORDER BY (revision_number ASC, op_id ASC);
+    PRIMARY KEY ((todo_uuid), revision_number, timestamp, op_id)
+) WITH CLUSTERING ORDER BY (revision_number ASC, timestamp ASC, op_id ASC);
