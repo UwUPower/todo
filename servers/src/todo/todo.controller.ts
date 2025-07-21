@@ -127,7 +127,7 @@ export class TodoController {
       'Forbidden: User does not have permission to access this todo.',
   })
   @ApiResponse({ status: 404, description: 'Todo not found.' })
-  async findOne(
+  async getAuthorizedTodo(
     @Param('uuid') uuid: string,
     @Req() req: Request,
     @Query('fields') fields?: string,
@@ -147,7 +147,7 @@ export class TodoController {
         );
       }
     }
-    const todoPartial = await this.todoService.findOneByUuid(
+    const todoPartial = await this.todoService.getAuthorizedTodo(
       uuid,
       user.id,
       fieldsArray,

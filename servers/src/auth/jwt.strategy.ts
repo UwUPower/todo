@@ -28,7 +28,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     // Find the user by UUID to get their internal ID and other details
-    const user = await this.userService.findOneByUuid(userUuidFromToken);
+    const user = await this.userService.getUserByUuid(userUuidFromToken);
 
     if (!user) {
       throw new UnauthorizedException('User not found or invalid token.');

@@ -171,13 +171,13 @@ describe('UserService', () => {
     });
   });
 
-  describe('findOneByEmail', () => {
+  describe('getUserByEmail', () => {
     it('should return a user if found by email', async () => {
       // Arrange
       (usersRepository.findOne as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
-      const result = await service.findOneByEmail(mockUserEmail);
+      const result = await service.getUserByEmail(mockUserEmail);
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({
@@ -191,7 +191,7 @@ describe('UserService', () => {
       (usersRepository.findOne as jest.Mock).mockResolvedValue(null);
 
       // Act
-      const result = await service.findOneByEmail('nonexistent@example.com');
+      const result = await service.getUserByEmail('nonexistent@example.com');
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({
@@ -201,13 +201,13 @@ describe('UserService', () => {
     });
   });
 
-  describe('findOneById', () => {
+  describe('getUserById', () => {
     it('should return a user if found by ID', async () => {
       // Arrange
       (usersRepository.findOne as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
-      const result = await service.findOneById(mockUserId);
+      const result = await service.getUserById(mockUserId);
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({
@@ -221,7 +221,7 @@ describe('UserService', () => {
       (usersRepository.findOne as jest.Mock).mockResolvedValue(null);
 
       // Act
-      const result = await service.findOneById(999); // Non-existent ID
+      const result = await service.getUserById(999); // Non-existent ID
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({
@@ -231,13 +231,13 @@ describe('UserService', () => {
     });
   });
 
-  describe('findOneByUuid', () => {
+  describe('getUserByUuid', () => {
     it('should return a user if found by UUID', async () => {
       // Arrange
       (usersRepository.findOne as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
-      const result = await service.findOneByUuid(mockUserUuid);
+      const result = await service.getUserByUuid(mockUserUuid);
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({
@@ -251,7 +251,7 @@ describe('UserService', () => {
       (usersRepository.findOne as jest.Mock).mockResolvedValue(null);
 
       // Act
-      const result = await service.findOneByUuid('non-existent-uuid');
+      const result = await service.getUserByUuid('non-existent-uuid');
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({

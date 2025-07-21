@@ -38,15 +38,15 @@ export class UserService {
     return this.usersRepository.save(newUser);
   }
 
-  async findOneByEmail(email: string): Promise<User | null> {
+  async getUserByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { email } });
   }
 
-  async findOneById(id: number): Promise<User | null> {
+  async getUserById(id: number): Promise<User | null> {
     return this.usersRepository.findOne({ where: { id } });
   }
 
-  async findOneByUuid(uuid: string): Promise<User | null> {
+  async getUserByUuid(uuid: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { uuid } });
   }
 }

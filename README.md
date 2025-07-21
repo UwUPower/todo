@@ -79,11 +79,13 @@ $ npm run start:prod
 
 ### run unit test
 ```
+cd server
 npm run test
 ```
 
 ### run unit test with coverage report
 ```
+cd server
 npm run test:cov
 ```
 

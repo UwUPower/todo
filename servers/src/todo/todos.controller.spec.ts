@@ -81,7 +81,7 @@ describe('TodosController', () => {
         {
           provide: TodoService,
           useValue: {
-            findAll: jest.fn(), // Mock the findAll method
+            getAuthorizedTodos: jest.fn(), // Mock the findAll method
           },
         },
       ],
@@ -107,16 +107,19 @@ describe('TodosController', () => {
 
     it('should return a paginated list of todos with default fields if no fields are specified', async () => {
       // Arrange
-      (todoService.findAll as jest.Mock).mockResolvedValue({
+      (todoService.getAuthorizedTodos as jest.Mock).mockResolvedValue({
         data: mockTodosList,
         total: mockTotal,
       });
 
       // Act
-      const result = await controller.findAll(req, mockGetTodosRequestDto);
+      const result = await controller.getAuthorizedTodos(
+        req,
+        mockGetTodosRequestDto,
+      );
 
       // Assert
-      expect(todoService.findAll).toHaveBeenCalledWith(
+      expect(todoService.getAuthorizedTodos).toHaveBeenCalledWith(
         mockUser.id,
         mockGetTodosRequestDto,
       );
@@ -145,16 +148,16 @@ describe('TodosController', () => {
 
       // Mock the service to return partial data if it were to filter at service level
       // For controller test, we assume service returns full data and controller handles serialization
-      (todoService.findAll as jest.Mock).mockResolvedValue({
+      (todoService.getAuthorizedTodos as jest.Mock).mockResolvedValue({
         data: mockTodosList,
         total: mockTotal,
       });
 
       // Act
-      const result = await controller.findAll(req, dtoWithFields);
+      const result = await controller.getAuthorizedTodos(req, dtoWithFields);
 
       // Assert
-      expect(todoService.findAll).toHaveBeenCalledWith(
+      expect(todoService.getAuthorizedTodos).toHaveBeenCalledWith(
         mockUser.id,
         dtoWithFields,
       );
@@ -180,27 +183,27 @@ describe('TodosController', () => {
 
       // Act & Assert
       await expect(
-        controller.findAll(req, dtoWithInvalidFields),
+        controller.getAuthorizedTodos(req, dtoWithInvalidFields),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        controller.findAll(req, dtoWithInvalidFields),
+        controller.getAuthorizedTodos(req, dtoWithInvalidFields),
       ).rejects.toThrow(
         `Invalid field(s) requested for return: invalidField. Allowed fields are: ${allowedFields}.`,
       );
-      expect(todoService.findAll).not.toHaveBeenCalled(); // Service should not be called
+      expect(todoService.getAuthorizedTodos).not.toHaveBeenCalled(); // Service should not be called
     });
 
     it('should handle service throwing an UnauthorizedException', async () => {
       // Arrange
-      (todoService.findAll as jest.Mock).mockRejectedValue(
+      (todoService.getAuthorizedTodos as jest.Mock).mockRejectedValue(
         new UnauthorizedException('Unauthorized.'),
       );
 
       // Act & Assert
       await expect(
-        controller.findAll(req, mockGetTodosRequestDto),
+        controller.getAuthorizedTodos(req, mockGetTodosRequestDto),
       ).rejects.toThrow(UnauthorizedException);
-      expect(todoService.findAll).toHaveBeenCalledWith(
+      expect(todoService.getAuthorizedTodos).toHaveBeenCalledWith(
         mockUser.id,
         mockGetTodosRequestDto,
       );
@@ -208,15 +211,15 @@ describe('TodosController', () => {
 
     it('should handle service throwing a BadRequestException for invalid query params', async () => {
       // Arrange
-      (todoService.findAll as jest.Mock).mockRejectedValue(
+      (todoService.getAuthorizedTodos as jest.Mock).mockRejectedValue(
         new BadRequestException('Invalid query parameters.'),
       );
 
       // Act & Assert
       await expect(
-        controller.findAll(req, mockGetTodosRequestDto),
+        controller.getAuthorizedTodos(req, mockGetTodosRequestDto),
       ).rejects.toThrow(BadRequestException);
-      expect(todoService.findAll).toHaveBeenCalledWith(
+      expect(todoService.getAuthorizedTodos).toHaveBeenCalledWith(
         mockUser.id,
         mockGetTodosRequestDto,
       );

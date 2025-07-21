@@ -112,7 +112,7 @@ const mockUpdateTodoRequestDto: UpdateTodoRequestDto = {
 };
 
 describe('TodoService', () => {
-  let service: TodoService;
+  let todoService: TodoService;
   let todoRepository: Repository<Todo>;
   let userService: UserService;
   let userTodoService: UserTodoService;
@@ -147,8 +147,8 @@ describe('TodoService', () => {
         {
           provide: UserService,
           useValue: {
-            findOneByEmail: jest.fn(),
-            findOneByUuid: jest.fn(), // Added for consistency, though not used in this service file
+            getUserByEmail: jest.fn(),
+            getUserByUuid: jest.fn(), // Added for consistency, though not used in this service file
           },
         },
         {
@@ -163,7 +163,7 @@ describe('TodoService', () => {
       ],
     }).compile();
 
-    service = module.get<TodoService>(TodoService);
+    todoService = module.get<TodoService>(TodoService);
     todoRepository = module.get<Repository<Todo>>(getRepositoryToken(Todo));
     userService = module.get<UserService>(UserService);
     userTodoService = module.get<UserTodoService>(UserTodoService);
@@ -187,7 +187,7 @@ describe('TodoService', () => {
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(todoService).toBeDefined();
   });
 
   describe('create', () => {
@@ -198,7 +198,10 @@ describe('TodoService', () => {
         mockUserTodoOwner,
       );
 
-      const result = await service.create(mockCreateTodoRequestDto, mockUserId);
+      const result = await todoService.create(
+        mockCreateTodoRequestDto,
+        mockUserId,
+      );
 
       expect(todoRepository.create).toHaveBeenCalledWith({
         name: mockCreateTodoRequestDto.name,
@@ -226,7 +229,7 @@ describe('TodoService', () => {
         mockUserTodoOwner,
       );
 
-      const result = await service.create(dtoWithoutTags, mockUserId);
+      const result = await todoService.create(dtoWithoutTags, mockUserId);
 
       expect(todoRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -249,7 +252,7 @@ describe('TodoService', () => {
         attributes: { tags: mockUpdateTodoRequestDto.tags },
       });
 
-      const result = await service.update(
+      const result = await todoService.update(
         mockTodoUuid,
         mockUpdateTodoRequestDto,
         mockUserId,
@@ -284,7 +287,7 @@ describe('TodoService', () => {
         ...mockUpdateTodoRequestDto,
       });
 
-      const result = await service.update(
+      const result = await todoService.update(
         mockTodoUuid,
         mockUpdateTodoRequestDto,
         mockUserId,
@@ -297,7 +300,7 @@ describe('TodoService', () => {
       (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        service.update(mockTodoUuid, mockUpdateTodoRequestDto, mockUserId),
+        todoService.update(mockTodoUuid, mockUpdateTodoRequestDto, mockUserId),
       ).rejects.toThrow(NotFoundException);
       expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid, deletedAt: IsNull() },
@@ -311,7 +314,7 @@ describe('TodoService', () => {
       );
 
       await expect(
-        service.update(mockTodoUuid, mockUpdateTodoRequestDto, mockUserId),
+        todoService.update(mockTodoUuid, mockUpdateTodoRequestDto, mockUserId),
       ).rejects.toThrow(ForbiddenException);
       expect(userTodoService.findOne).toHaveBeenCalledWith(
         mockUserId,
@@ -324,7 +327,7 @@ describe('TodoService', () => {
       (userTodoService.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        service.update(mockTodoUuid, mockUpdateTodoRequestDto, mockUserId),
+        todoService.update(mockTodoUuid, mockUpdateTodoRequestDto, mockUserId),
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -347,7 +350,7 @@ describe('TodoService', () => {
         Promise.resolve(todo),
       ); // Return the saved object
 
-      const result = await service.update(
+      const result = await todoService.update(
         mockTodoUuid,
         updateDtoWithoutTags,
         mockUserId,
@@ -372,7 +375,7 @@ describe('TodoService', () => {
         Promise.resolve(todo),
       ); // Return the saved object
 
-      const result = await service.update(
+      const result = await todoService.update(
         mockTodoUuid,
         updateDtoWithEmptyTags,
         mockUserId,
@@ -382,7 +385,7 @@ describe('TodoService', () => {
     });
   });
 
-  describe('findOneByUuid', () => {
+  describe('getUserByUuid', () => {
     it('should return a todo with default fields if no fields are specified', async () => {
       (todoRepository.findOne as jest.Mock)
         .mockResolvedValueOnce({ id: mockTodoId }) // For id lookup
@@ -391,7 +394,10 @@ describe('TodoService', () => {
         mockUserTodoOwner,
       );
 
-      const result = await service.findOneByUuid(mockTodoUuid, mockUserId);
+      const result = await todoService.getAuthorizedTodo(
+        mockTodoUuid,
+        mockUserId,
+      );
 
       expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid },
@@ -436,7 +442,7 @@ describe('TodoService', () => {
         mockUserTodoOwner,
       );
 
-      const result = await service.findOneByUuid(
+      const result = await todoService.getAuthorizedTodo(
         mockTodoUuid,
         mockUserId,
         requestedFields,
@@ -463,7 +469,7 @@ describe('TodoService', () => {
       (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined); // No todo ID found
 
       await expect(
-        service.findOneByUuid(mockTodoUuid, mockUserId),
+        todoService.getAuthorizedTodo(mockTodoUuid, mockUserId),
       ).rejects.toThrow(NotFoundException);
       expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid },
@@ -479,7 +485,7 @@ describe('TodoService', () => {
       (userTodoService.findOne as jest.Mock).mockResolvedValue(undefined); // No userTodo relation
 
       await expect(
-        service.findOneByUuid(mockTodoUuid, mockUserId),
+        todoService.getAuthorizedTodo(mockTodoUuid, mockUserId),
       ).rejects.toThrow(ForbiddenException);
       expect(userTodoService.findOne).toHaveBeenCalledWith(
         mockUserId,
@@ -509,7 +515,10 @@ describe('TodoService', () => {
     });
 
     it('should return a paginated list of todos with default filters and sort', async () => {
-      const result = await service.findAll(mockUserId, mockListTodosDto);
+      const result = await todoService.getAuthorizedTodos(
+        mockUserId,
+        mockListTodosDto,
+      );
 
       expect(mockQueryBuilder.innerJoin).toHaveBeenCalledWith(
         'users_todos',
@@ -544,7 +553,7 @@ describe('TodoService', () => {
 
     it('should filter by name (wildcard)', async () => {
       const dto = { ...mockListTodosDto, name: 'test' };
-      await service.findAll(mockUserId, dto);
+      await todoService.getAuthorizedTodos(mockUserId, dto);
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'LOWER(todo.name) LIKE LOWER(:name)',
         { name: '%test%' },
@@ -553,7 +562,7 @@ describe('TodoService', () => {
 
     it('should filter by uuid', async () => {
       const dto = { ...mockListTodosDto, uuid: mockTodoUuid };
-      await service.findAll(mockUserId, dto);
+      await todoService.getAuthorizedTodos(mockUserId, dto);
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'todo.uuid = :uuid',
         { uuid: mockTodoUuid },
@@ -566,7 +575,7 @@ describe('TodoService', () => {
         dueDateAfter: '2025-07-20',
         dueDateBefore: '2025-07-25',
       };
-      await service.findAll(mockUserId, dto);
+      await todoService.getAuthorizedTodos(mockUserId, dto);
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'todo.dueDate BETWEEN :after AND :before',
         expect.objectContaining({
@@ -582,7 +591,7 @@ describe('TodoService', () => {
         status: TodoStatusEnum.COMPLETED,
         priority: TodoPriorityEnum.HIGH,
       };
-      await service.findAll(mockUserId, dto);
+      await todoService.getAuthorizedTodos(mockUserId, dto);
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'todo.status = :status',
         { status: TodoStatusEnum.COMPLETED },
@@ -595,7 +604,7 @@ describe('TodoService', () => {
 
     it('should filter by tags', async () => {
       const dto = { ...mockListTodosDto, tags: 'tag1,tag3' };
-      await service.findAll(mockUserId, dto);
+      await todoService.getAuthorizedTodos(mockUserId, dto);
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         `(todo.attributes->'tags') ?| :tags`,
         { tags: ['tag1', 'tag3'] },
@@ -608,13 +617,13 @@ describe('TodoService', () => {
         sortBy: ToDosSortByEnum.NAME,
         sortOrder: SortOrderEnum.ASC,
       };
-      await service.findAll(mockUserId, dto);
+      await todoService.getAuthorizedTodos(mockUserId, dto);
       expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('todo.name', 'ASC');
     });
 
     it('should return only specified fields', async () => {
       const dto = { ...mockListTodosDto, fields: 'name,uuid,tags' };
-      await service.findAll(mockUserId, dto);
+      await todoService.getAuthorizedTodos(mockUserId, dto);
       expect(mockQueryBuilder.select).toHaveBeenCalledWith(
         expect.arrayContaining([
           'todo.id',
@@ -634,7 +643,7 @@ describe('TodoService', () => {
         sortBy: ToDosSortByEnum.DUE_DATE,
         fields: 'name',
       };
-      await service.findAll(mockUserId, dto);
+      await todoService.getAuthorizedTodos(mockUserId, dto);
       expect(mockQueryBuilder.select).toHaveBeenCalledWith(
         expect.arrayContaining(['todo.id', 'todo.name', 'todo.dueDate']),
       );
@@ -642,7 +651,7 @@ describe('TodoService', () => {
 
     it('should default to all fields if fields param is empty or invalid', async () => {
       const dto = { ...mockListTodosDto, fields: '' }; // Empty fields
-      await service.findAll(mockUserId, dto);
+      await todoService.getAuthorizedTodos(mockUserId, dto);
       expect(mockQueryBuilder.select).toHaveBeenCalledWith(
         expect.arrayContaining([
           'todo.id',
@@ -668,7 +677,7 @@ describe('TodoService', () => {
         affected: 1,
       });
 
-      await service.softDelete(mockTodoUuid, mockUserId);
+      await todoService.softDelete(mockTodoUuid, mockUserId);
 
       expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid, deletedAt: IsNull() },
@@ -684,7 +693,7 @@ describe('TodoService', () => {
       (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        service.softDelete(mockTodoUuid, mockUserId),
+        todoService.softDelete(mockTodoUuid, mockUserId),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -695,7 +704,7 @@ describe('TodoService', () => {
       ); // Not owner
 
       await expect(
-        service.softDelete(mockTodoUuid, mockUserId),
+        todoService.softDelete(mockTodoUuid, mockUserId),
       ).rejects.toThrow(ForbiddenException);
     });
   });
@@ -709,14 +718,14 @@ describe('TodoService', () => {
       (userTodoService.findOne as jest.Mock)
         .mockResolvedValueOnce(mockUserTodoOwner) // Owner permission check
         .mockResolvedValueOnce(undefined); // No existing permission for invited user
-      (userService.findOneByEmail as jest.Mock).mockResolvedValue(invitedUser);
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(invitedUser);
       (userTodoService.create as jest.Mock).mockResolvedValue({
         userId: invitedUser.id,
         todoId: mockTodo.id,
         role: UserTodoRole.VIEWER,
       });
 
-      await service.inviteUserToTodo(
+      await todoService.inviteUserToTodo(
         mockTodoUuid,
         mockUserId,
         invitedUserEmail,
@@ -730,7 +739,7 @@ describe('TodoService', () => {
         mockUserId,
         mockTodo.id,
       ); // Owner check
-      expect(userService.findOneByEmail).toHaveBeenCalledWith(invitedUserEmail);
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(invitedUserEmail);
       expect(userTodoService.findOne).toHaveBeenCalledWith(
         invitedUser.id,
         mockTodo.id,
@@ -746,7 +755,7 @@ describe('TodoService', () => {
       (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        service.inviteUserToTodo(
+        todoService.inviteUserToTodo(
           mockTodoUuid,
           mockUserId,
           invitedUserEmail,
@@ -762,7 +771,7 @@ describe('TodoService', () => {
       ); // Not owner
 
       await expect(
-        service.inviteUserToTodo(
+        todoService.inviteUserToTodo(
           mockTodoUuid,
           mockUserId,
           invitedUserEmail,
@@ -776,10 +785,10 @@ describe('TodoService', () => {
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
-      (userService.findOneByEmail as jest.Mock).mockResolvedValue(undefined); // Invited user not found
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(undefined); // Invited user not found
 
       await expect(
-        service.inviteUserToTodo(
+        todoService.inviteUserToTodo(
           mockTodoUuid,
           mockUserId,
           invitedUserEmail,
@@ -793,10 +802,10 @@ describe('TodoService', () => {
       (userTodoService.findOne as jest.Mock)
         .mockResolvedValueOnce(mockUserTodoOwner)
         .mockResolvedValueOnce(mockUserTodoViewer); // Existing permission
-      (userService.findOneByEmail as jest.Mock).mockResolvedValue(invitedUser);
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(invitedUser);
 
       await expect(
-        service.inviteUserToTodo(
+        todoService.inviteUserToTodo(
           mockTodoUuid,
           mockUserId,
           invitedUserEmail,
@@ -816,13 +825,13 @@ describe('TodoService', () => {
       (userTodoService.findOne as jest.Mock)
         .mockResolvedValueOnce(mockUserTodoOwner) // Owner permission check
         .mockResolvedValueOnce(targetUserTodo); // Target user's existing permission
-      (userService.findOneByEmail as jest.Mock).mockResolvedValue(targetUser);
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(targetUser);
       (userTodoService.updateRole as jest.Mock).mockResolvedValue({
         ...targetUserTodo,
         role: UserTodoRole.EDITOR,
       });
 
-      await service.updateUserRole(
+      await todoService.updateUserRole(
         mockTodoUuid,
         mockUserId,
         targetUserEmail,
@@ -833,7 +842,7 @@ describe('TodoService', () => {
         where: { uuid: mockTodoUuid, deletedAt: IsNull() },
       });
       expect(userTodoService.findOne).toHaveBeenCalledTimes(1);
-      expect(userService.findOneByEmail).toHaveBeenCalledWith(targetUserEmail);
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(targetUserEmail);
       expect(userTodoService.updateRole).toHaveBeenCalledWith(
         targetUser.id,
         mockTodo.id,
@@ -845,7 +854,7 @@ describe('TodoService', () => {
       (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        service.updateUserRole(
+        todoService.updateUserRole(
           mockTodoUuid,
           mockUserId,
           targetUserEmail,
@@ -861,7 +870,7 @@ describe('TodoService', () => {
       ); // Not owner
 
       await expect(
-        service.updateUserRole(
+        todoService.updateUserRole(
           mockTodoUuid,
           mockUserId,
           targetUserEmail,
@@ -875,10 +884,10 @@ describe('TodoService', () => {
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
-      (userService.findOneByEmail as jest.Mock).mockResolvedValue(undefined); // Target user not found
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(undefined); // Target user not found
 
       await expect(
-        service.updateUserRole(
+        todoService.updateUserRole(
           mockTodoUuid,
           mockUserId,
           targetUserEmail,
@@ -901,12 +910,12 @@ describe('TodoService', () => {
           todoId: mockTodo.id,
           role: UserTodoRole.VIEWER,
         }); // Target user permission
-      (userService.findOneByEmail as jest.Mock).mockResolvedValue(targetUser);
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(targetUser);
       (userTodoService.removeUserPermission as jest.Mock).mockResolvedValue({
         affected: 1,
       });
 
-      await service.removeUserPermissionFromTodo(
+      await todoService.removeUserPermissionFromTodo(
         mockTodoUuid,
         mockUserId,
         targetUserEmail,
@@ -919,7 +928,7 @@ describe('TodoService', () => {
         mockUserId,
         mockTodo.id,
       ); // Owner check
-      expect(userService.findOneByEmail).toHaveBeenCalledWith(targetUserEmail);
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(targetUserEmail);
       expect(userTodoService.removeUserPermission).toHaveBeenCalledWith(
         targetUser.id,
         mockTodo.id,
@@ -930,7 +939,7 @@ describe('TodoService', () => {
       (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        service.removeUserPermissionFromTodo(
+        todoService.removeUserPermissionFromTodo(
           mockTodoUuid,
           mockUserId,
           targetUserEmail,
@@ -945,7 +954,7 @@ describe('TodoService', () => {
       ); // Not owner
 
       await expect(
-        service.removeUserPermissionFromTodo(
+        todoService.removeUserPermissionFromTodo(
           mockTodoUuid,
           mockUserId,
           targetUserEmail,
@@ -958,10 +967,10 @@ describe('TodoService', () => {
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
-      (userService.findOneByEmail as jest.Mock).mockResolvedValue(undefined); // Target user not found
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(undefined); // Target user not found
 
       await expect(
-        service.removeUserPermissionFromTodo(
+        todoService.removeUserPermissionFromTodo(
           mockTodoUuid,
           mockUserId,
           targetUserEmail,

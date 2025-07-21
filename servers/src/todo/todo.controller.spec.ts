@@ -98,7 +98,7 @@ describe('TodoController', () => {
           useValue: {
             create: jest.fn(),
             update: jest.fn(),
-            findOneByUuid: jest.fn(),
+            getAuthorizedTodo: jest.fn(),
             softDelete: jest.fn(),
             inviteUserToTodo: jest.fn(),
             updateUserRole: jest.fn(),
@@ -179,14 +179,14 @@ describe('TodoController', () => {
     });
   });
 
-  // --- Find One Todo ---
-  describe('findOne', () => {
+  // --- getAuthorizedTodo ---
+  describe('getAuthorizedTodo', () => {
     it('should return a todo with default fields', async () => {
-      (todoService.findOneByUuid as jest.Mock).mockResolvedValue(mockTodo);
+      (todoService.getAuthorizedTodo as jest.Mock).mockResolvedValue(mockTodo);
 
-      const result = await controller.findOne(mockTodoUuid, req);
+      const result = await controller.getAuthorizedTodo(mockTodoUuid, req);
 
-      expect(todoService.findOneByUuid).toHaveBeenCalledWith(
+      expect(todoService.getAuthorizedTodo).toHaveBeenCalledWith(
         mockTodoUuid,
         mockUser.id,
         [], // No fields specified in query
@@ -196,12 +196,18 @@ describe('TodoController', () => {
 
     it('should return a todo with specified fields', async () => {
       const partialTodo = { uuid: mockTodo.uuid, name: mockTodo.name };
-      (todoService.findOneByUuid as jest.Mock).mockResolvedValue(partialTodo);
+      (todoService.getAuthorizedTodo as jest.Mock).mockResolvedValue(
+        partialTodo,
+      );
 
       const fieldsQuery = 'name,uuid';
-      const result = await controller.findOne(mockTodoUuid, req, fieldsQuery);
+      const result = await controller.getAuthorizedTodo(
+        mockTodoUuid,
+        req,
+        fieldsQuery,
+      );
 
-      expect(todoService.findOneByUuid).toHaveBeenCalledWith(
+      expect(todoService.getAuthorizedTodo).toHaveBeenCalledWith(
         mockTodoUuid,
         mockUser.id,
         ['name', 'uuid'],
@@ -214,36 +220,36 @@ describe('TodoController', () => {
       const allowedFields = Object.values(ToDoQueryEnum).join(', ');
 
       await expect(
-        controller.findOne(mockTodoUuid, req, invalidFieldsQuery),
+        controller.getAuthorizedTodo(mockTodoUuid, req, invalidFieldsQuery),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        controller.findOne(mockTodoUuid, req, invalidFieldsQuery),
+        controller.getAuthorizedTodo(mockTodoUuid, req, invalidFieldsQuery),
       ).rejects.toThrow(
         `Invalid field(s) requested: invalidField. Allowed fields are: ${allowedFields}.`,
       );
-      expect(todoService.findOneByUuid).not.toHaveBeenCalled(); // Should not call service if fields are invalid
+      expect(todoService.getAuthorizedTodo).not.toHaveBeenCalled(); // Should not call service if fields are invalid
     });
 
     it('should throw NotFoundException if todo not found', async () => {
-      (todoService.findOneByUuid as jest.Mock).mockRejectedValue(
+      (todoService.getAuthorizedTodo as jest.Mock).mockRejectedValue(
         new NotFoundException('Todo not found.'),
       );
 
-      await expect(controller.findOne(mockTodoUuid, req)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        controller.getAuthorizedTodo(mockTodoUuid, req),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ForbiddenException if user lacks permission', async () => {
-      (todoService.findOneByUuid as jest.Mock).mockRejectedValue(
+      (todoService.getAuthorizedTodo as jest.Mock).mockRejectedValue(
         new ForbiddenException(
           'You do not have permission to access this todo.',
         ),
       );
 
-      await expect(controller.findOne(mockTodoUuid, req)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        controller.getAuthorizedTodo(mockTodoUuid, req),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 

@@ -99,7 +99,7 @@ export class TodoService {
     const updatedTodo = await this.todoRepository.save(todoToBeUpdated);
     return updatedTodo;
   }
-  async findOneByUuid(
+  async getAuthorizedTodo(
     uuid: string,
     userId: number,
     fields: string[] = [],
@@ -159,7 +159,7 @@ export class TodoService {
 
     return todo;
   }
-  async findAll(
+  async getAuthorizedTodos(
     userId: number,
     getTodosRequestDto: GetTodosRequestDto,
   ): Promise<{ data: Todo[]; total: number }> {
@@ -327,7 +327,7 @@ export class TodoService {
       );
     }
 
-    const invitedUser = await this.userService.findOneByEmail(invitedUserEmail);
+    const invitedUser = await this.userService.getUserByEmail(invitedUserEmail);
     if (!invitedUser) {
       throw new NotFoundException(
         `User with email "${invitedUserEmail}" not found.`,
@@ -367,7 +367,7 @@ export class TodoService {
       );
     }
 
-    const targetUser = await this.userService.findOneByEmail(targetUserEmail);
+    const targetUser = await this.userService.getUserByEmail(targetUserEmail);
     if (!targetUser) {
       throw new NotFoundException(
         `Target user with email "${targetUserEmail}" not found.`,
@@ -396,7 +396,7 @@ export class TodoService {
       );
     }
 
-    const targetUser = await this.userService.findOneByEmail(targetUserEmail);
+    const targetUser = await this.userService.getUserByEmail(targetUserEmail);
     if (!targetUser) {
       throw new NotFoundException(
         `Target user with email "${targetUserEmail}" not found.`,
@@ -406,7 +406,7 @@ export class TodoService {
     await this.userTodoService.removeUserPermission(targetUser.id, todo.id);
   }
 
-  async findOneByUuidForWebSocket(uuid: string) {
+  async getUserByUuidForWebSocket(uuid: string) {
     const todo = await this.todoRepository.findOne({
       where: { uuid, deletedAt: IsNull() },
     });

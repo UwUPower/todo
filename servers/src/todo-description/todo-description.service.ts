@@ -117,14 +117,14 @@ export class TodoDescriptionService {
       const decoded: any = jwt.verify(accessToken, this.JWT_SECRET);
       const userUuid = decoded.uuid;
 
-      const user = await this.userService.findOneByUuid(userUuid);
+      const user = await this.userService.getUserByUuid(userUuid);
       if (!user) {
         this.logger.warn(`WS Auth failed: User not found for UUID ${userUuid}`);
         ws.close(1008, 'Unauthorized: User not found');
         return false;
       }
 
-      const todo = await this.todoService.findOneByUuidForWebSocket(todoUuid);
+      const todo = await this.todoService.getUserByUuidForWebSocket(todoUuid);
       if (!todo) {
         this.logger.warn(`WS Auth failed: Todo not found for UUID ${todoUuid}`);
         ws.close(1008, 'Unauthorized: Todo not found');

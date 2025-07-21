@@ -39,7 +39,7 @@ describe('AuthService', () => {
         {
           provide: UserService,
           useValue: {
-            findOneByEmail: jest.fn(),
+            getUserByEmail: jest.fn(),
           },
         },
         {
@@ -56,7 +56,7 @@ describe('AuthService', () => {
     jwtService = module.get<JwtService>(JwtService);
 
     // Reset mocks before each test
-    (userService.findOneByEmail as jest.Mock).mockReset();
+    (userService.getUserByEmail as jest.Mock).mockReset();
     (jwtService.sign as jest.Mock).mockReset();
     (bcrypt.compare as jest.Mock).mockReset();
   });
@@ -68,7 +68,7 @@ describe('AuthService', () => {
   describe('validateUser', () => {
     it('should return partial user data if email and password are valid', async () => {
       // Arrange
-      (userService.findOneByEmail as jest.Mock).mockResolvedValue(mockUser);
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true); // Password matches
 
       // Act
@@ -78,7 +78,7 @@ describe('AuthService', () => {
       );
 
       // Assert
-      expect(userService.findOneByEmail).toHaveBeenCalledWith(
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(
         mockLoginRequestDto.email,
       );
       expect(bcrypt.compare).toHaveBeenCalledWith(
@@ -94,7 +94,7 @@ describe('AuthService', () => {
 
     it('should return null if user is not found', async () => {
       // Arrange
-      (userService.findOneByEmail as jest.Mock).mockResolvedValue(undefined); // User not found
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(undefined); // User not found
 
       // Act
       const result = await authService.validateUser(
@@ -103,7 +103,7 @@ describe('AuthService', () => {
       );
 
       // Assert
-      expect(userService.findOneByEmail).toHaveBeenCalledWith(
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(
         'nonexistent@example.com',
       );
       expect(bcrypt.compare).not.toHaveBeenCalled(); // Should not attempt to compare password
@@ -112,7 +112,7 @@ describe('AuthService', () => {
 
     it('should return null if password does not match', async () => {
       // Arrange
-      (userService.findOneByEmail as jest.Mock).mockResolvedValue(mockUser);
+      (userService.getUserByEmail as jest.Mock).mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false); // Password does not match
 
       // Act
@@ -122,7 +122,7 @@ describe('AuthService', () => {
       );
 
       // Assert
-      expect(userService.findOneByEmail).toHaveBeenCalledWith(
+      expect(userService.getUserByEmail).toHaveBeenCalledWith(
         mockLoginRequestDto.email,
       );
       expect(bcrypt.compare).toHaveBeenCalledWith(

@@ -37,7 +37,7 @@ export class TodosController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 400, description: 'Invalid query parameters.' })
-  async findAll(
+  async getAuthorizedTodos(
     @Req() req: Request,
     @Query() getTodosRequestDto: GetTodosRequestDto,
   ): Promise<PaginatedTodosResponseDto> {
@@ -57,7 +57,7 @@ export class TodosController {
       }
     }
 
-    const { data, total } = await this.todoService.findAll(
+    const { data, total } = await this.todoService.getAuthorizedTodos(
       user.id,
       getTodosRequestDto,
     );

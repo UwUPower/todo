@@ -139,7 +139,7 @@ export class TodoPostEditConsumerService
         timestamp: row.timestamp,
       }));
 
-      const todo = await this.todoService.findOneByUuidForWebSocket(todoUuid);
+      const todo = await this.todoService.getUserByUuidForWebSocket(todoUuid);
       if (!todo) {
         this.logger.warn(`Todo with UUID ${todoUuid} not found.`);
         return;

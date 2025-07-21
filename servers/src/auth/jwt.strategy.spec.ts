@@ -40,7 +40,7 @@ describe('JwtStrategy', () => {
         {
           provide: UserService,
           useValue: {
-            findOneByUuid: jest.fn(), // Mock the findOneByUuid method
+            getUserByUuid: jest.fn(), // Mock the getUserByUuid method
           },
         },
       ],
@@ -51,7 +51,7 @@ describe('JwtStrategy', () => {
     configService = module.get<ConfigService>(ConfigService);
 
     // Reset mocks before each test
-    (userService.findOneByUuid as jest.Mock).mockReset();
+    (userService.getUserByUuid as jest.Mock).mockReset();
     (configService.get as jest.Mock).mockReset();
   });
 
@@ -63,13 +63,13 @@ describe('JwtStrategy', () => {
     it('should return a partial user object if validation is successful', async () => {
       // Arrange
       const payload = { uuid: mockUser.uuid, email: mockUser.email };
-      (userService.findOneByUuid as jest.Mock).mockResolvedValue(mockUser);
+      (userService.getUserByUuid as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
       const result = await jwtStrategy.validate(payload);
 
       // Assert
-      expect(userService.findOneByUuid).toHaveBeenCalledWith(mockUser.uuid);
+      expect(userService.getUserByUuid).toHaveBeenCalledWith(mockUser.uuid);
       expect(result).toEqual({
         id: mockUser.id,
         uuid: mockUser.uuid,
@@ -88,7 +88,7 @@ describe('JwtStrategy', () => {
       await expect(jwtStrategy.validate(payload)).rejects.toThrow(
         'User UUID not found in token.',
       );
-      expect(userService.findOneByUuid).not.toHaveBeenCalled(); // Should not attempt to find user
+      expect(userService.getUserByUuid).not.toHaveBeenCalled(); // Should not attempt to find user
     });
 
     it('should throw UnauthorizedException if user is not found in the database', async () => {
@@ -97,7 +97,7 @@ describe('JwtStrategy', () => {
         uuid: 'non-existent-uuid',
         email: 'nonexistent@example.com',
       };
-      (userService.findOneByUuid as jest.Mock).mockResolvedValue(undefined); // User not found
+      (userService.getUserByUuid as jest.Mock).mockResolvedValue(undefined); // User not found
 
       // Act & Assert
       await expect(jwtStrategy.validate(payload)).rejects.toThrow(
@@ -106,7 +106,7 @@ describe('JwtStrategy', () => {
       await expect(jwtStrategy.validate(payload)).rejects.toThrow(
         'User not found or invalid token.',
       );
-      expect(userService.findOneByUuid).toHaveBeenCalledWith(payload.uuid);
+      expect(userService.getUserByUuid).toHaveBeenCalledWith(payload.uuid);
     });
 
     it('should handle JWT_SECRET being undefined and fallback to default', async () => {
@@ -130,7 +130,7 @@ describe('JwtStrategy', () => {
       jwtStrategy = module.get<JwtStrategy>(JwtStrategy);
 
       const payload = { uuid: mockUser.uuid, email: mockUser.email };
-      (userService.findOneByUuid as jest.Mock).mockResolvedValue(mockUser);
+      (userService.getUserByUuid as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
       const result = await jwtStrategy.validate(payload);
