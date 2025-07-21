@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -314,8 +315,6 @@ export class TodoService {
       throw new NotFoundException(`Todo with UUID "${todoUuid}" not found.`);
     }
 
-    console.log({ userId });
-
     const userTodo = await this.userTodoService.findOne(userId, todo.id);
     if (!userTodo || userTodo.role !== UserTodoRole.OWNER) {
       throw new ForbiddenException(
@@ -341,5 +340,35 @@ export class TodoService {
     }
 
     await this.userTodoService.create(invitedUser.id, todo.id, role);
+  }
+
+  async updateUserRole(
+    todoUuid: string,
+    userId: number,
+    targetUserEmail: string,
+    newRole: UserTodoRole,
+  ): Promise<void> {
+    const todo = await this.todosRepository.findOne({
+      where: { uuid: todoUuid, deletedAt: IsNull() },
+    });
+    if (!todo) {
+      throw new NotFoundException(`Todo with UUID "${todoUuid}" not found.`);
+    }
+
+    const userTodo = await this.userTodoService.findOne(userId, todo.id);
+    if (!userTodo || userTodo.role !== UserTodoRole.OWNER) {
+      throw new ForbiddenException(
+        'You do not have permission to update this todo.',
+      );
+    }
+
+    const targetUser = await this.userService.findOneByEmail(targetUserEmail);
+    if (!targetUser) {
+      throw new NotFoundException(
+        `Target user with email "${targetUserEmail}" not found.`,
+      );
+    }
+
+    await this.userTodoService.updateRole(userId, todo.id, newRole);
   }
 }

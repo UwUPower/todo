@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserTodo, UserTodoRole } from './entities/user-todo.entity';
@@ -21,6 +21,24 @@ export class UserTodoService {
       role,
     });
     return this.userTodoRepository.save(newUserTodo);
+  }
+
+  async updateRole(
+    userId: number,
+    todoId: number,
+    newRole: UserTodoRole,
+  ): Promise<UserTodo> {
+    const userTodo = await this.userTodoRepository.findOne({
+      where: { userId, todoId },
+    });
+    if (!userTodo) {
+      throw new NotFoundException(
+        `UserTodo relation not found for userId ${userId} and todoId ${todoId}.`,
+      );
+    }
+
+    userTodo.role = newRole;
+    return this.userTodoRepository.save(userTodo);
   }
 
   async findOne(userId: number, todoId: number): Promise<UserTodo | null> {

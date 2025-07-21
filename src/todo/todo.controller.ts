@@ -39,6 +39,7 @@ import {
 import { GetTodoResponseDto } from './dto/get-todo.dto';
 import { ToDoQueryEnum } from './enums';
 import { InviteUserRequestDto } from './dto/invite-user.dto';
+import { UpdateUserRoleRequestDto } from './dto/update-user-role.dto';
 
 @ApiTags('Todo')
 @ApiBearerAuth('JWT-auth')
@@ -208,6 +209,40 @@ export class TodoController {
       user.id,
       inviteUserRequestDto.email,
       inviteUserRequestDto.role,
+    );
+  }
+
+  @Patch(':uuid/role')
+  @ApiParam({
+    name: 'uuid',
+    description: 'UUID of the todo',
+  })
+  @ApiBody({
+    type: UpdateUserRoleRequestDto,
+    description: "Data for updating a user's role on a todo.",
+  })
+  @ApiResponse({ status: 200, description: 'User role successfully updated.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden: Only owner can update user roles on a todo.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Todo or target user not found for this todo.',
+  })
+  @HttpCode(HttpStatus.OK)
+  async updateUserRoleOnTodo(
+    @Param('uuid') todoUuid: string,
+    @Body() body: UpdateUserRoleRequestDto,
+    @Req() req: Request,
+  ): Promise<void> {
+    const user = req.user as User;
+    await this.todoService.updateUserRole(
+      todoUuid,
+      user.id,
+      body.email,
+      body.role,
     );
   }
 }
