@@ -13,7 +13,7 @@ import { DescriptionOperationInterface } from '../common/operationalTransform/in
 import * as cassandra from 'cassandra-driver';
 import * as amqp from 'amqplib';
 import { v4 as uuidv4 } from 'uuid';
-import { UserTodoRole } from 'src/user-todo/entities/user-todo.entity';
+import { UserTodoRole } from '../user-todo/entities/user-todo.entity';
 
 interface ClientInfo {
   ws: WebSocket;

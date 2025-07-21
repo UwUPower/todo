@@ -7,7 +7,7 @@ import {
 import { Client, types as cassandraTypes } from 'cassandra-driver';
 import * as amqplib from 'amqplib';
 import { TodoService } from '../todo/todo.service';
-import { DescriptionOperationInterface } from 'src/common/operationalTransform/interfaces';
+import { DescriptionOperationInterface } from '../common/operationalTransform/interfaces';
 
 interface CassandraOperationLog {
   todo_uuid: string;

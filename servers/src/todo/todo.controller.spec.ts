@@ -22,7 +22,7 @@ import {
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { Request } from 'express';
-import { UserTodoRole } from '../user-todo/entities/user-todo.entity'; // Assuming this path is correct
+import { UserTodoRole } from '../user-todo/entities/user-todo.entity';
 
 describe('TodoController', () => {
   let controller: TodoController;
