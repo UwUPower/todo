@@ -50,6 +50,25 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+  nestjs-app:
+    build:
+      context: . 
+      dockerfile: Dockerfile
+    container_name: nestjs_api
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_HOST: "postgresql"
+      DATABASE_PORT: "5432"
+      DATABASE_USER: "user"
+      DATABASE_PASSWORD: "password"
+      DATABASE_NAME: "todo"
+      JWT_SECRET: "secret"
+      SALT_ROUNDS: 10
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:
