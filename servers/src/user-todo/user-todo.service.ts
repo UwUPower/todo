@@ -10,7 +10,7 @@ export class UserTodoService {
     private userTodoRepository: Repository<UserTodo>,
   ) {}
 
-  async create(
+  async createUserTodo(
     userId: number,
     todoId: number,
     role: UserTodoRole,

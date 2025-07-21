@@ -96,8 +96,8 @@ describe('TodoController', () => {
         {
           provide: TodoService,
           useValue: {
-            create: jest.fn(),
-            update: jest.fn(),
+            createTodo: jest.fn(),
+            updateTodo: jest.fn(),
             getAuthorizedTodo: jest.fn(),
             softDelete: jest.fn(),
             inviteUserToTodo: jest.fn(),
@@ -122,11 +122,11 @@ describe('TodoController', () => {
   // --- Create Todo ---
   describe('create', () => {
     it('should create a todo and return a CreateTodoResponseDto', async () => {
-      (todoService.create as jest.Mock).mockResolvedValue(mockTodo);
+      (todoService.createTodo as jest.Mock).mockResolvedValue(mockTodo);
 
       const result = await controller.create(mockCreateTodoRequestDto, req);
 
-      expect(todoService.create).toHaveBeenCalledWith(
+      expect(todoService.createTodo).toHaveBeenCalledWith(
         mockCreateTodoRequestDto,
         mockUser.id,
       );
@@ -138,7 +138,7 @@ describe('TodoController', () => {
   describe('update', () => {
     it('should update a todo and return an UpdateTodoResponseDto', async () => {
       const updatedTodo = { ...mockTodo, name: mockUpdateTodoRequestDto.name };
-      (todoService.update as jest.Mock).mockResolvedValue(updatedTodo);
+      (todoService.updateTodo as jest.Mock).mockResolvedValue(updatedTodo);
 
       const result = await controller.update(
         mockTodoUuid,
@@ -146,7 +146,7 @@ describe('TodoController', () => {
         req,
       );
 
-      expect(todoService.update).toHaveBeenCalledWith(
+      expect(todoService.updateTodo).toHaveBeenCalledWith(
         mockTodoUuid,
         mockUpdateTodoRequestDto,
         mockUser.id,
@@ -157,7 +157,7 @@ describe('TodoController', () => {
     });
 
     it('should throw NotFoundException if todo not found', async () => {
-      (todoService.update as jest.Mock).mockRejectedValue(
+      (todoService.updateTodo as jest.Mock).mockRejectedValue(
         new NotFoundException('Todo not found.'),
       );
 
@@ -167,7 +167,7 @@ describe('TodoController', () => {
     });
 
     it('should throw ForbiddenException if user lacks permission', async () => {
-      (todoService.update as jest.Mock).mockRejectedValue(
+      (todoService.updateTodo as jest.Mock).mockRejectedValue(
         new ForbiddenException(
           'You do not have permission to update this todo.',
         ),

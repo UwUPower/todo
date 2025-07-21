@@ -14,7 +14,7 @@ export class UserService {
     private configService: ConfigService,
   ) {}
 
-  async create(createUserDto: CreateUserRequestDto): Promise<User> {
+  async createUser(createUserDto: CreateUserRequestDto): Promise<User> {
     const existingUser = await this.usersRepository.findOne({
       where: { email: createUserDto.email },
     });

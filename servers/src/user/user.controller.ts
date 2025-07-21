@@ -33,7 +33,7 @@ export class UserController {
   })
   @Post()
   async createUser(@Body() createUserDto: CreateUserRequestDto) {
-    const user = await this.UserService.create(createUserDto);
+    const user = await this.UserService.createUser(createUserDto);
     return plainToInstance(CreateUserResponseDto, user);
   }
 }

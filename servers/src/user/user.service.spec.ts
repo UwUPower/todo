@@ -13,7 +13,7 @@ jest.mock('bcrypt', () => ({
 }));
 
 describe('UserService', () => {
-  let service: UserService;
+  let userService: UserService;
   let usersRepository: Repository<User>;
   let configService: ConfigService;
 
@@ -64,7 +64,7 @@ describe('UserService', () => {
       ],
     }).compile();
 
-    service = module.get<UserService>(UserService);
+    userService = module.get<UserService>(UserService);
     usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
     configService = module.get<ConfigService>(ConfigService);
 
@@ -85,7 +85,7 @@ describe('UserService', () => {
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(userService).toBeDefined();
   });
 
   describe('create', () => {
@@ -100,7 +100,7 @@ describe('UserService', () => {
       (usersRepository.save as jest.Mock).mockResolvedValue(mockUser); // Return the saved user
 
       // Act
-      const result = await service.create(mockCreateUserDto);
+      const result = await userService.createUser(mockCreateUserDto);
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({
@@ -127,10 +127,10 @@ describe('UserService', () => {
       (usersRepository.findOne as jest.Mock).mockResolvedValue(mockUser); // User already exists
 
       // Act & Assert
-      await expect(service.create(mockCreateUserDto)).rejects.toThrow(
+      await expect(userService.createUser(mockCreateUserDto)).rejects.toThrow(
         BadRequestException,
       );
-      await expect(service.create(mockCreateUserDto)).rejects.toThrow(
+      await expect(userService.createUser(mockCreateUserDto)).rejects.toThrow(
         'Email already registered.',
       );
       expect(usersRepository.findOne).toHaveBeenCalledWith({
@@ -160,7 +160,7 @@ describe('UserService', () => {
       });
 
       // Act
-      await service.create(mockCreateUserDto);
+      await userService.createUser(mockCreateUserDto);
 
       // Assert
       // It should call bcrypt.hash with the default '10' as salt rounds
@@ -177,7 +177,7 @@ describe('UserService', () => {
       (usersRepository.findOne as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
-      const result = await service.getUserByEmail(mockUserEmail);
+      const result = await userService.getUserByEmail(mockUserEmail);
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({
@@ -191,7 +191,9 @@ describe('UserService', () => {
       (usersRepository.findOne as jest.Mock).mockResolvedValue(null);
 
       // Act
-      const result = await service.getUserByEmail('nonexistent@example.com');
+      const result = await userService.getUserByEmail(
+        'nonexistent@example.com',
+      );
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({
@@ -207,7 +209,7 @@ describe('UserService', () => {
       (usersRepository.findOne as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
-      const result = await service.getUserById(mockUserId);
+      const result = await userService.getUserById(mockUserId);
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({
@@ -221,7 +223,7 @@ describe('UserService', () => {
       (usersRepository.findOne as jest.Mock).mockResolvedValue(null);
 
       // Act
-      const result = await service.getUserById(999); // Non-existent ID
+      const result = await userService.getUserById(999); // Non-existent ID
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({
@@ -237,7 +239,7 @@ describe('UserService', () => {
       (usersRepository.findOne as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
-      const result = await service.getUserByUuid(mockUserUuid);
+      const result = await userService.getUserByUuid(mockUserUuid);
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({
@@ -251,7 +253,7 @@ describe('UserService', () => {
       (usersRepository.findOne as jest.Mock).mockResolvedValue(null);
 
       // Act
-      const result = await service.getUserByUuid('non-existent-uuid');
+      const result = await userService.getUserByUuid('non-existent-uuid');
 
       // Assert
       expect(usersRepository.findOne).toHaveBeenCalledWith({

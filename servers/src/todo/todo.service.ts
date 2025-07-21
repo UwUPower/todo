@@ -34,7 +34,7 @@ export class TodoService {
     private readonly userTodoService: UserTodoService,
   ) {}
 
-  async create(
+  async createTodo(
     createTodoRequestDto: CreateTodoRequestDto,
     userId: number,
   ): Promise<Todo> {
@@ -51,7 +51,7 @@ export class TodoService {
 
     const createdTodo = await this.todoRepository.save(newTodo);
 
-    await this.userTodoService.create(
+    await this.userTodoService.createUserTodo(
       userId,
       createdTodo.id,
       UserTodoRole.OWNER,
@@ -60,7 +60,7 @@ export class TodoService {
     return createdTodo;
   }
 
-  async update(
+  async updateTodo(
     uuid: string,
     updateRequestTodoDto: UpdateTodoRequestDto,
     userId: number,
@@ -357,7 +357,7 @@ export class TodoService {
       );
     }
 
-    await this.userTodoService.create(invitedUser.id, todo.id, role);
+    await this.userTodoService.createUserTodo(invitedUser.id, todo.id, role);
   }
 
   async updateUserRole(

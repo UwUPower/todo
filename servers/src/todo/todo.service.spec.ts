@@ -154,7 +154,7 @@ describe('TodoService', () => {
         {
           provide: UserTodoService,
           useValue: {
-            create: jest.fn(),
+            createUserTodo: jest.fn(),
             getTodoByUserIdAndTodoId: jest.fn(),
             updateRole: jest.fn(),
             removeUserPermission: jest.fn(),
@@ -194,11 +194,11 @@ describe('TodoService', () => {
     it('should create a new todo and assign owner', async () => {
       (todoRepository.create as jest.Mock).mockReturnValue(mockTodo);
       (todoRepository.save as jest.Mock).mockResolvedValue(mockTodo);
-      (userTodoService.create as jest.Mock).mockResolvedValue(
+      (userTodoService.createUserTodo as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
 
-      const result = await todoService.create(
+      const result = await todoService.createTodo(
         mockCreateTodoRequestDto,
         mockUserId,
       );
@@ -212,7 +212,7 @@ describe('TodoService', () => {
         attributes: { tags: mockCreateTodoRequestDto.tags },
       });
       expect(todoRepository.save).toHaveBeenCalledWith(mockTodo);
-      expect(userTodoService.create).toHaveBeenCalledWith(
+      expect(userTodoService.createUserTodo).toHaveBeenCalledWith(
         mockUserId,
         mockTodo.id,
         UserTodoRole.OWNER,
@@ -225,11 +225,11 @@ describe('TodoService', () => {
       const todoWithEmptyTags = { ...mockTodo, attributes: { tags: [] } };
       (todoRepository.create as jest.Mock).mockReturnValue(todoWithEmptyTags);
       (todoRepository.save as jest.Mock).mockResolvedValue(todoWithEmptyTags);
-      (userTodoService.create as jest.Mock).mockResolvedValue(
+      (userTodoService.createUserTodo as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
 
-      const result = await todoService.create(dtoWithoutTags, mockUserId);
+      const result = await todoService.createTodo(dtoWithoutTags, mockUserId);
 
       expect(todoRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -252,7 +252,7 @@ describe('TodoService', () => {
         attributes: { tags: mockUpdateTodoRequestDto.tags },
       });
 
-      const result = await todoService.update(
+      const result = await todoService.updateTodo(
         mockTodoUuid,
         mockUpdateTodoRequestDto,
         mockUserId,
@@ -287,7 +287,7 @@ describe('TodoService', () => {
         ...mockUpdateTodoRequestDto,
       });
 
-      const result = await todoService.update(
+      const result = await todoService.updateTodo(
         mockTodoUuid,
         mockUpdateTodoRequestDto,
         mockUserId,
@@ -300,7 +300,11 @@ describe('TodoService', () => {
       (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        todoService.update(mockTodoUuid, mockUpdateTodoRequestDto, mockUserId),
+        todoService.updateTodo(
+          mockTodoUuid,
+          mockUpdateTodoRequestDto,
+          mockUserId,
+        ),
       ).rejects.toThrow(NotFoundException);
       expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid, deletedAt: IsNull() },
@@ -314,7 +318,11 @@ describe('TodoService', () => {
       );
 
       await expect(
-        todoService.update(mockTodoUuid, mockUpdateTodoRequestDto, mockUserId),
+        todoService.updateTodo(
+          mockTodoUuid,
+          mockUpdateTodoRequestDto,
+          mockUserId,
+        ),
       ).rejects.toThrow(ForbiddenException);
       expect(userTodoService.getTodoByUserIdAndTodoId).toHaveBeenCalledWith(
         mockUserId,
@@ -329,7 +337,11 @@ describe('TodoService', () => {
       );
 
       await expect(
-        todoService.update(mockTodoUuid, mockUpdateTodoRequestDto, mockUserId),
+        todoService.updateTodo(
+          mockTodoUuid,
+          mockUpdateTodoRequestDto,
+          mockUserId,
+        ),
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -352,7 +364,7 @@ describe('TodoService', () => {
         Promise.resolve(todo),
       ); // Return the saved object
 
-      const result = await todoService.update(
+      const result = await todoService.updateTodo(
         mockTodoUuid,
         updateDtoWithoutTags,
         mockUserId,
@@ -377,7 +389,7 @@ describe('TodoService', () => {
         Promise.resolve(todo),
       ); // Return the saved object
 
-      const result = await todoService.update(
+      const result = await todoService.updateTodo(
         mockTodoUuid,
         updateDtoWithEmptyTags,
         mockUserId,
@@ -723,7 +735,7 @@ describe('TodoService', () => {
         .mockResolvedValueOnce(mockUserTodoOwner) // Owner permission check
         .mockResolvedValueOnce(undefined); // No existing permission for invited user
       (userService.getUserByEmail as jest.Mock).mockResolvedValue(invitedUser);
-      (userTodoService.create as jest.Mock).mockResolvedValue({
+      (userTodoService.createUserTodo as jest.Mock).mockResolvedValue({
         userId: invitedUser.id,
         todoId: mockTodo.id,
         role: UserTodoRole.VIEWER,
@@ -748,7 +760,7 @@ describe('TodoService', () => {
         invitedUser.id,
         mockTodo.id,
       ); // Existing permission check
-      expect(userTodoService.create).toHaveBeenCalledWith(
+      expect(userTodoService.createUserTodo).toHaveBeenCalledWith(
         invitedUser.id,
         mockTodo.id,
         UserTodoRole.VIEWER,

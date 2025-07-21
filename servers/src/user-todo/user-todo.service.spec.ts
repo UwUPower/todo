@@ -8,7 +8,7 @@ import { Todo } from '../todo/entities/todo.entity';
 import { TodoStatusEnum, TodoPriorityEnum } from '../todo/enums';
 
 describe('UserTodoService', () => {
-  let service: UserTodoService;
+  let userTodoService: UserTodoService;
   let userTodoRepository: Repository<UserTodo>;
 
   // Mock Data
@@ -73,14 +73,14 @@ describe('UserTodoService', () => {
       ],
     }).compile();
 
-    service = module.get<UserTodoService>(UserTodoService);
+    userTodoService = module.get<UserTodoService>(UserTodoService);
     userTodoRepository = module.get<Repository<UserTodo>>(
       getRepositoryToken(UserTodo),
     );
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(userTodoService).toBeDefined();
   });
 
   describe('create', () => {
@@ -88,7 +88,7 @@ describe('UserTodoService', () => {
       (userTodoRepository.create as jest.Mock).mockReturnValue(mockUserTodo);
       (userTodoRepository.save as jest.Mock).mockResolvedValue(mockUserTodo);
 
-      const result = await service.create(
+      const result = await userTodoService.createUserTodo(
         mockUserId,
         mockTodoId,
         UserTodoRole.VIEWER,
@@ -111,7 +111,11 @@ describe('UserTodoService', () => {
       (userTodoRepository.findOne as jest.Mock).mockResolvedValue(mockUserTodo);
       (userTodoRepository.save as jest.Mock).mockResolvedValue(updatedUserTodo);
 
-      const result = await service.updateRole(mockUserId, mockTodoId, newRole);
+      const result = await userTodoService.updateRole(
+        mockUserId,
+        mockTodoId,
+        newRole,
+      );
 
       expect(userTodoRepository.findOne).toHaveBeenCalledWith({
         where: { userId: mockUserId, todoId: mockTodoId },
@@ -124,10 +128,10 @@ describe('UserTodoService', () => {
       (userTodoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        service.updateRole(mockUserId, mockTodoId, UserTodoRole.EDITOR),
+        userTodoService.updateRole(mockUserId, mockTodoId, UserTodoRole.EDITOR),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        service.updateRole(mockUserId, mockTodoId, UserTodoRole.EDITOR),
+        userTodoService.updateRole(mockUserId, mockTodoId, UserTodoRole.EDITOR),
       ).rejects.toThrow(
         `UserTodo relation not found for userId ${mockUserId} and todoId ${mockTodoId}.`,
       );
@@ -138,7 +142,7 @@ describe('UserTodoService', () => {
     it('should return a user-todo relation if found', async () => {
       (userTodoRepository.findOne as jest.Mock).mockResolvedValue(mockUserTodo);
 
-      const result = await service.getTodoByUserIdAndTodoId(
+      const result = await userTodoService.getTodoByUserIdAndTodoId(
         mockUserId,
         mockTodoId,
       );
@@ -152,7 +156,7 @@ describe('UserTodoService', () => {
     it('should return null if user-todo relation not found', async () => {
       (userTodoRepository.findOne as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.getTodoByUserIdAndTodoId(
+      const result = await userTodoService.getTodoByUserIdAndTodoId(
         mockUserId,
         mockTodoId,
       );
@@ -170,7 +174,7 @@ describe('UserTodoService', () => {
         affected: 1,
       });
 
-      await service.removeUserPermission(mockUserId, mockTodoId);
+      await userTodoService.removeUserPermission(mockUserId, mockTodoId);
 
       expect(userTodoRepository.softDelete).toHaveBeenCalledWith({
         userId: mockUserId,
@@ -184,10 +188,10 @@ describe('UserTodoService', () => {
       });
 
       await expect(
-        service.removeUserPermission(mockUserId, mockTodoId),
+        userTodoService.removeUserPermission(mockUserId, mockTodoId),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        service.removeUserPermission(mockUserId, mockTodoId),
+        userTodoService.removeUserPermission(mockUserId, mockTodoId),
       ).rejects.toThrow('No permission has been deleted');
     });
   });

@@ -37,7 +37,7 @@ describe('UserController', () => {
         {
           provide: UserService,
           useValue: {
-            create: jest.fn(),
+            createUser: jest.fn(),
           },
         },
       ],
@@ -54,13 +54,15 @@ describe('UserController', () => {
   describe('createUser', () => {
     it('should create a user and return a CreateUserResponseDto', async () => {
       // Arrange
-      (userService.create as jest.Mock).mockResolvedValue(mockUser);
+      (userService.createUser as jest.Mock).mockResolvedValue(mockUser);
 
       // Act
       const result = await controller.createUser(mockCreateUserRequestDto);
 
       // Assert
-      expect(userService.create).toHaveBeenCalledWith(mockCreateUserRequestDto);
+      expect(userService.createUser).toHaveBeenCalledWith(
+        mockCreateUserRequestDto,
+      );
       // Ensure the response is transformed correctly using plainToInstance
       expect(result).toEqual(plainToInstance(CreateUserResponseDto, mockUser));
       expect(result).toHaveProperty('uuid', mockUser.uuid);
@@ -69,7 +71,7 @@ describe('UserController', () => {
 
     it('should throw BadRequestException if user creation fails (e.g., email already registered)', async () => {
       // Arrange
-      (userService.create as jest.Mock).mockRejectedValue(
+      (userService.createUser as jest.Mock).mockRejectedValue(
         new BadRequestException('Email already registered.'),
       );
 
@@ -80,7 +82,9 @@ describe('UserController', () => {
       await expect(
         controller.createUser(mockCreateUserRequestDto),
       ).rejects.toThrow('Email already registered.');
-      expect(userService.create).toHaveBeenCalledWith(mockCreateUserRequestDto);
+      expect(userService.createUser).toHaveBeenCalledWith(
+        mockCreateUserRequestDto,
+      );
     });
   });
 });

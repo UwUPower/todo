@@ -68,7 +68,10 @@ export class TodoController {
     @Req() req: Request,
   ): Promise<CreateTodoResponseDto> {
     const user = req.user as User;
-    const todo = await this.todoService.create(createTodoRequestDto, user.id);
+    const todo = await this.todoService.createTodo(
+      createTodoRequestDto,
+      user.id,
+    );
     return plainToInstance(CreateTodoResponseDto, todo);
   }
 
@@ -96,7 +99,7 @@ export class TodoController {
     @Req() req: Request,
   ): Promise<UpdateTodoResponseDto> {
     const user = req.user as User;
-    const todo = await this.todoService.update(
+    const todo = await this.todoService.updateTodo(
       uuid,
       updateTodoRequestDto,
       user.id,
