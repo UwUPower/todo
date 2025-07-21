@@ -1,33 +1,18 @@
 import {
   Controller,
-  Post,
-  Body,
   UseGuards,
   Req,
   UseInterceptors,
   ClassSerializerInterceptor,
-  Patch,
-  Param,
   Get,
   Query,
   BadRequestException,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
-import {
-  CreateTodoRequestDto,
-  CreateTodoResponseDto,
-} from './dto/create-todo.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
 import { plainToInstance } from 'class-transformer';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiParam,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '../user/entities/user.entity';
 import { GetTodoResponseDto } from './dto/get-todo.dto';
 import { ToDoQueryEnum } from './enums';

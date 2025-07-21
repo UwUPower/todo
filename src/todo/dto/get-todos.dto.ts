@@ -1,7 +1,7 @@
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString, IsInt, Min, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
-import { TodoStatus, TodoPriority } from '../entities/todo.entity';
+import { TodoStatusEnum, TodoPriorityEnum } from '../entities/todo.entity';
 import { SortOrderEnum, ToDosSortByEnum } from '../enums';
 import { GetTodoResponseDto } from './get-todo.dto';
 
@@ -61,22 +61,22 @@ export class GetTodosRequestDto {
   dueDateBefore?: string;
 
   @ApiPropertyOptional({
-    enum: TodoStatus,
+    enum: TodoStatusEnum,
     description: 'Filter todos by status.',
-    example: TodoStatus.NOT_STARTED,
+    example: TodoStatusEnum.NOT_STARTED,
   })
-  @IsEnum(TodoStatus)
+  @IsEnum(TodoStatusEnum)
   @IsOptional()
-  status?: TodoStatus;
+  status?: TodoStatusEnum;
 
   @ApiPropertyOptional({
-    enum: TodoPriority,
+    enum: TodoPriorityEnum,
     description: 'Filter todos by priority.',
-    example: TodoPriority.MEDIUM,
+    example: TodoPriorityEnum.MEDIUM,
   })
-  @IsEnum(TodoPriority)
+  @IsEnum(TodoPriorityEnum)
   @IsOptional()
-  priority?: TodoPriority;
+  priority?: TodoPriorityEnum;
 
   @ApiPropertyOptional({
     type: String,

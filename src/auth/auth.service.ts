@@ -1,10 +1,8 @@
-// src/auth/auth.service.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { LoginRequestDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
-// No need to import User entity here, just work with what validateUser returns
 
 @Injectable()
 export class AuthService {

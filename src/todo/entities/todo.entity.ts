@@ -2,13 +2,13 @@ import { Entity, Column, OneToMany } from 'typeorm';
 import { UserTodo } from '../../user-todo/entities/user-todo.entity';
 import { BaseEntity } from '../../common/entities/base.entity';
 
-export enum TodoStatus {
+export enum TodoStatusEnum {
   NOT_STARTED = 'NOT_STARTED',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
 }
 
-export enum TodoPriority {
+export enum TodoPriorityEnum {
   LOW = 'LOW',
   MEDIUM = 'MEDIUM',
   HIGH = 'HIGH',
@@ -36,11 +36,19 @@ export class Todo extends BaseEntity {
   })
   dueDate: Date;
 
-  @Column({ type: 'enum', enum: TodoStatus, default: TodoStatus.NOT_STARTED })
-  status: TodoStatus;
+  @Column({
+    type: 'enum',
+    enum: TodoStatusEnum,
+    default: TodoStatusEnum.NOT_STARTED,
+  })
+  status: TodoStatusEnum;
 
-  @Column({ type: 'enum', enum: TodoPriority, default: TodoPriority.MEDIUM })
-  priority: TodoPriority;
+  @Column({
+    type: 'enum',
+    enum: TodoPriorityEnum,
+    default: TodoPriorityEnum.MEDIUM,
+  })
+  priority: TodoPriorityEnum;
 
   @Column({ type: 'jsonb', nullable: true })
   attributes: Tags; // Stores tags like {"tags": ["UI", "backend"]}

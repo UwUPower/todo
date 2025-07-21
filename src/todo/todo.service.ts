@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
-import { Todo, TodoStatus, TodoPriority } from './entities/todo.entity';
+import { Todo, TodoStatusEnum, TodoPriorityEnum } from './entities/todo.entity';
 import { UserTodoRole } from '../user-todo/entities/user-todo.entity';
 import { UserTodoService } from '../user-todo/user-todo.service';
 import { CreateTodoRequestDto } from './dto/create-todo.dto';
@@ -37,8 +37,8 @@ export class TodoService {
       name: createTodoRequestDto.name,
       description: createTodoRequestDto.description,
       dueDate: createTodoRequestDto.dueDate,
-      status: createTodoRequestDto.status || TodoStatus.NOT_STARTED,
-      priority: createTodoRequestDto.priority || TodoPriority.MEDIUM,
+      status: createTodoRequestDto.status || TodoStatusEnum.NOT_STARTED,
+      priority: createTodoRequestDto.priority || TodoPriorityEnum.MEDIUM,
       attributes: createTodoRequestDto.tags
         ? { tags: createTodoRequestDto.tags }
         : { tags: [] },

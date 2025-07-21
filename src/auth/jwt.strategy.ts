@@ -1,4 +1,3 @@
-// src/auth/jwt.strategy.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
@@ -21,6 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any): Promise<Partial<User>> {
     // Expect 'uuid' in the payload, not 'sub'
+    // It is not safe to include the integer id in JWT
     const userUuidFromToken = payload.uuid;
 
     if (!userUuidFromToken) {

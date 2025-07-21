@@ -7,7 +7,11 @@ import {
   IsDateString,
   IsArray,
 } from 'class-validator';
-import { TodoStatus, TodoPriority, Tags } from '../entities/todo.entity';
+import {
+  TodoStatusEnum,
+  TodoPriorityEnum,
+  Tags,
+} from '../entities/todo.entity';
 import { Exclude, Expose, Transform } from 'class-transformer';
 
 export class CreateTodoRequestDto {
@@ -36,24 +40,24 @@ export class CreateTodoRequestDto {
   dueDate?: Date;
 
   @ApiProperty({
-    enum: TodoStatus,
+    enum: TodoStatusEnum,
     description: 'Status of the todo item',
-    example: TodoStatus.NOT_STARTED,
-    default: TodoStatus.NOT_STARTED,
+    example: TodoStatusEnum.NOT_STARTED,
+    default: TodoStatusEnum.NOT_STARTED,
   })
-  @IsEnum(TodoStatus)
+  @IsEnum(TodoStatusEnum)
   @IsOptional()
-  status?: TodoStatus = TodoStatus.NOT_STARTED;
+  status?: TodoStatusEnum = TodoStatusEnum.NOT_STARTED;
 
   @ApiProperty({
-    enum: TodoPriority,
+    enum: TodoPriorityEnum,
     description: 'Priority of the todo item',
-    example: TodoPriority.MEDIUM,
-    default: TodoPriority.MEDIUM,
+    example: TodoPriorityEnum.MEDIUM,
+    default: TodoPriorityEnum.MEDIUM,
   })
-  @IsEnum(TodoPriority)
+  @IsEnum(TodoPriorityEnum)
   @IsOptional()
-  priority?: TodoPriority = TodoPriority.MEDIUM;
+  priority?: TodoPriorityEnum = TodoPriorityEnum.MEDIUM;
 
   @ApiPropertyOptional({
     description: 'Tags for a todo item',
@@ -91,18 +95,18 @@ export class CreateTodoResponseDto {
   dueDate: Date;
 
   @ApiProperty({
-    enum: TodoStatus,
+    enum: TodoStatusEnum,
     description: 'The status of the todo item.',
-    example: TodoStatus.IN_PROGRESS,
+    example: TodoStatusEnum.IN_PROGRESS,
   })
-  status: TodoStatus;
+  status: TodoStatusEnum;
 
   @ApiProperty({
-    enum: TodoPriority,
+    enum: TodoPriorityEnum,
     description: 'The priority of the todo item.',
-    example: TodoPriority.HIGH,
+    example: TodoPriorityEnum.HIGH,
   })
-  priority: TodoPriority;
+  priority: TodoPriorityEnum;
 
   @ApiProperty({
     description: 'Attributes json object containing tag',
