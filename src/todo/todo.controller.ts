@@ -11,6 +11,9 @@ import {
   Get,
   Query,
   BadRequestException,
+  HttpCode,
+  HttpStatus,
+  Delete,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import {
@@ -146,5 +149,27 @@ export class TodoController {
       fieldsArray,
     );
     return plainToInstance(GetTodoResponseDto, todoPartial);
+  }
+
+  @Delete(':uuid')
+  @ApiParam({
+    name: 'uuid',
+    description: 'UUID of the todo item to soft-delete.',
+  })
+  @ApiResponse({ status: 204, description: 'Todo successfully soft-deleted.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Forbidden: User does not have permission to soft-delete this todo.',
+  })
+  @ApiResponse({ status: 404, description: 'Todo not found.' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async softDelete(
+    @Param('uuid') uuid: string,
+    @Req() req: Request,
+  ): Promise<void> {
+    const user = req.user as User;
+    await this.todoService.softDelete(uuid, user.id);
   }
 }

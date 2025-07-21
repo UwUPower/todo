@@ -281,4 +281,22 @@ export class TodoService {
       .getManyAndCount();
     return { data, total };
   }
+
+  async softDelete(uuid: string, userId: number): Promise<void> {
+    const todo = await this.todosRepository.findOne({
+      where: { uuid, deletedAt: IsNull() },
+    });
+    if (!todo) {
+      throw new NotFoundException(`Todo with UUID "${uuid}" not found.`);
+    }
+
+    const userTodo = await this.userTodoService.findOne(userId, todo.id);
+    if (!userTodo || userTodo.role !== UserTodoRole.OWNER) {
+      throw new ForbiddenException(
+        'You do not have permission to update this todo.',
+      );
+    }
+
+    await this.todosRepository.softDelete(todo.id);
+  }
 }
