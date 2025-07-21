@@ -11,8 +11,12 @@ import { UserTodoService } from '../user-todo/user-todo.service';
 import { CreateTodoRequestDto } from './dto/create-todo.dto';
 import { UpdateTodoRequestDto } from './dto/update-todo.dto';
 import { UserService } from 'src/user/user.service';
-import { ToDoQueryEnum } from './enum/todo-query-enum';
+import { SortOrderEnum, ToDoQueryEnum, ToDosSortByEnum } from './enums';
 import { GetTodosRequestDto } from './dto/get-todos.dto';
+import {
+  TODO_QUERY_ENUM_DB_FIELD_MAP,
+  TODO_SORT_BY_ENUM_DB_FIELD_MAP,
+} from './consts';
 
 @Injectable()
 export class TodoService {
@@ -112,36 +116,19 @@ export class TodoService {
       );
     }
 
-    const selectFields: (keyof Todo)[] = ['id', 'uuid'];
+    const selectFields: (keyof Todo)[] = [];
 
     if (fields.length > 0) {
-      const entityFieldsMap = {
-        [ToDoQueryEnum.UUID]: 'uuid',
-        [ToDoQueryEnum.NAME]: 'name',
-        [ToDoQueryEnum.DESCRIPTION]: 'description',
-        [ToDoQueryEnum.DUE_DATE]: 'dueDate',
-        [ToDoQueryEnum.STATUS]: 'status',
-        [ToDoQueryEnum.PRIORITY]: 'priority',
-        [ToDoQueryEnum.TAGS]: 'attributes', // Tags come from attributes
-      };
-
       const requestedEntityFields = fields
-        .map((field) => entityFieldsMap[field])
+        .map((field) => TODO_QUERY_ENUM_DB_FIELD_MAP[field])
         .filter(Boolean);
-
-      // Add 'attributes' if 'tags' was requested, as tags are derived from it.
-      if (
-        fields.includes(ToDoQueryEnum.TAGS) &&
-        !requestedEntityFields.includes('attributes')
-      ) {
-        requestedEntityFields.push('attributes');
-      }
 
       selectFields.push(...(requestedEntityFields as (keyof Todo)[]));
     } else {
       // If no specific fields are requested, select all fields necessary for TodoResponseDto
       // This makes sure all non-excluded fields in the DTO are available for transformation
       selectFields.push(
+        'uuid',
         'name',
         'description',
         'dueDate',
@@ -164,5 +151,134 @@ export class TodoService {
     }
 
     return todo;
+  }
+  async findAll(
+    userId: number,
+    getTodosRequestDto: GetTodosRequestDto,
+  ): Promise<{ data: Todo[]; total: number }> {
+    const {
+      page = 1,
+      limit = 10,
+      name,
+      uuid,
+      dueDateBefore,
+      dueDateAfter,
+      status,
+      priority,
+      tags,
+      sortBy = ToDosSortByEnum.DUE_DATE,
+      sortOrder = SortOrderEnum.DESC,
+      fields,
+    } = getTodosRequestDto;
+
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.todosRepository.createQueryBuilder('todo');
+
+    queryBuilder
+      .innerJoin(
+        'users_todos',
+        'userTodo',
+        'userTodo.todoId = todo.id AND userTodo.userId = :userId AND userTodo.deletedAt IS NULL',
+        { userId },
+      )
+      .where('todo.deletedAt IS NULL');
+
+    // Filtering
+    if (name) {
+      queryBuilder.andWhere('LOWER(todo.name) LIKE LOWER(:name)', {
+        name: `%${name}%`,
+      });
+    }
+
+    if (uuid) {
+      queryBuilder.andWhere('todo.uuid = :uuid', { uuid });
+    }
+
+    if (dueDateAfter || dueDateBefore) {
+      const after = dueDateAfter ? new Date(dueDateAfter) : undefined;
+      const before = dueDateBefore ? new Date(dueDateBefore) : undefined;
+
+      if (after) after.setUTCHours(0, 0, 0, 0);
+      if (before) before.setUTCHours(23, 59, 59, 999);
+
+      if (after && before) {
+        queryBuilder.andWhere('todo.dueDate BETWEEN :after AND :before', {
+          after,
+          before,
+        });
+      } else if (after) {
+        queryBuilder.andWhere('todo.dueDate >= :after', { after });
+      } else if (before) {
+        queryBuilder.andWhere('todo.dueDate <= :before', { before });
+      }
+    }
+
+    if (status) {
+      queryBuilder.andWhere('todo.status = :status', { status });
+    }
+
+    if (priority) {
+      queryBuilder.andWhere('todo.priority = :priority', { priority });
+    }
+
+    if (tags) {
+      const tagArray = tags.split(',').map((tag) => tag.trim());
+      queryBuilder.andWhere(`(todo.attributes->'tags') ?| :tags`, {
+        tags: tagArray,
+      });
+    }
+
+    // Sorting
+
+    const orderBy = TODO_SORT_BY_ENUM_DB_FIELD_MAP[sortBy] || 'todo.dueDate';
+    queryBuilder.orderBy(orderBy, sortOrder);
+
+    // Field Selection
+    const defaultFields: (keyof Todo)[] = [
+      'id',
+      'uuid',
+      'name',
+      'description',
+      'dueDate',
+      'status',
+      'priority',
+      'attributes',
+    ];
+
+    let requestedFields: (keyof Todo)[] = [];
+
+    if (fields) {
+      const rawFields = fields.split(',').map((f) => f.trim());
+      requestedFields = rawFields
+        .filter((f) => f in TODO_QUERY_ENUM_DB_FIELD_MAP)
+        .map((f) => TODO_QUERY_ENUM_DB_FIELD_MAP[f]);
+
+      // If tags requested, include attributes
+      if (
+        rawFields.includes('tags') &&
+        !requestedFields.includes('attributes')
+      ) {
+        requestedFields.push('attributes');
+      }
+    } else {
+      requestedFields = [...defaultFields];
+    }
+
+    // Always include fields used in sorting, otherwise the ORDER BY clause will be failed
+    const sortField = orderBy.split('.')[1] as keyof Todo;
+    if (!requestedFields.includes(sortField)) {
+      requestedFields.push(sortField);
+    }
+
+    const finalSelectFields = Array.from(new Set(['id', ...requestedFields]));
+    queryBuilder.select(finalSelectFields.map((field) => `todo.${field}`));
+
+    // Pagination + Result
+    const [data, total] = await queryBuilder
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+    return { data, total };
   }
 }

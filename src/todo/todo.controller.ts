@@ -34,7 +34,7 @@ import {
   UpdateTodoResponseDto,
 } from './dto/update-todo.dto';
 import { GetTodoResponseDto } from './dto/get-todo.dto';
-import { ToDoQueryEnum } from './enum/todo-query-enum';
+import { ToDoQueryEnum } from './enums';
 
 @ApiTags('Todo')
 @ApiBearerAuth('JWT-auth')
@@ -105,7 +105,7 @@ export class TodoController {
     type: String,
     description:
       'Comma-separated list of fields to return. Allowed options: uuid, name, description, dueDate, status, priority, tags',
-    example: 'name,uuid,tags',
+    example: 'name',
   })
   @ApiResponse({
     status: 200,
