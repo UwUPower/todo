@@ -41,6 +41,7 @@ import { ToDoQueryEnum } from './enums';
 import { InviteUserRequestDto } from './dtos/invite-user.dto';
 import { UpdateUserRoleRequestDto } from './dtos/update-user-role.dto';
 import { RemoveUserPermissionRequestDto } from './dtos/romve-user-permission.dto';
+import { GetUserTodoRoleResponseDto } from './dtos/get-todo-user-role.dto';
 
 @ApiTags('Todo')
 @ApiBearerAuth('JWT-auth')
@@ -245,6 +246,31 @@ export class TodoController {
       updateUserRoleRequestDto.email,
       updateUserRoleRequestDto.role,
     );
+  }
+
+  @Get(':uuid/user-role')
+  @ApiParam({ name: 'uuid', description: 'UUID of the todo item to retrieve.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Role of user of that todo',
+    type: GetUserTodoRoleResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid selction fields.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Forbidden: User does not have permission to access this todo.',
+  })
+  @ApiResponse({ status: 404, description: 'Todo not found.' })
+  async findOneUserRole(
+    @Param('uuid') uuid: string,
+    @Req() req: Request,
+    @Query('fields') fields?: string,
+  ): Promise<GetUserTodoRoleResponseDto> {
+    const user = req.user as User;
+    const todoPartial = await this.todoService.findOneUserRole(uuid, user.id);
+    return plainToInstance(GetUserTodoRoleResponseDto, todoPartial);
   }
 
   @Delete(':uuid/user-permission')

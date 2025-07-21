@@ -405,4 +405,34 @@ export class TodoService {
 
     await this.userTodoService.removeUserPermission(targetUser.id, todo.id);
   }
+
+  async findOneByUuidForWebSocket(uuid: string) {
+    const todo = await this.todosRepository.findOne({
+      where: { uuid, deletedAt: IsNull() },
+    });
+    return todo;
+  }
+
+  async findOneUserRole(todoUuid: string, userId: number) {
+    const todoIdObject = await this.todosRepository.findOne({
+      where: { uuid: todoUuid },
+      select: ['id'],
+    });
+
+    if (!todoIdObject) {
+      throw new NotFoundException(`Todo with UUID "${todoUuid}" not found.`);
+    }
+
+    const todoId = todoIdObject.id;
+
+    const userTodo = await this.userTodoService.findOne(userId, todoId);
+
+    if (!userTodo) {
+      throw new ForbiddenException(
+        'You do not have permission to access this todo.',
+      );
+    }
+
+    return { role: userTodo.role };
+  }
 }

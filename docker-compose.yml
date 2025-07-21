@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
 
   cassandra:
-    image: cassandra:4.1
+    image: cassandra:5.0.4
     container_name: cassandra_db
     ports:
       - "9042:9042"
@@ -50,26 +50,65 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-  nestjs-app:
+  api:
     build:
       context: ./servers
       dockerfile: Dockerfile
     container_name: nestjs_api
     ports:
-      - "3000:3000"
+      - 3001:3001
     environment:
-      APP: api
+      APP: "api"
+      API_PORT: "3001"
+      WEBSOKCET_PORT: "4001"
+      WEBCLIENT_PORT: "5001"
+      JWT_SECRET: "secret"
+      SALT_ROUNDS: 10
       DATABASE_HOST: "postgresql"
       DATABASE_PORT: "5432"
       DATABASE_USER: "user"
       DATABASE_PASSWORD: "password"
       DATABASE_NAME: "todo"
-      JWT_SECRET: "secret"
-      SALT_ROUNDS: 10
+      CASSANDRA_CONTACT_POINTS: "cassandra"
+      CASSANDRA_DATACENTER: "datacenter1"
+      CASSANDRA_KEYSPACE: "todo_ops"
+      RABBITMQ_URL: "amqp://rabbitmq"
+      RABBITMQ_QUEUE_POST_EDIT: "todo_post_edit_queue"
     depends_on:
       postgresql:
         condition: service_healthy
-    restart: unless-stopped
+      rabbitmq:
+        condition: service_healthy
+
+  web-socket:
+    build:
+      context: ./servers
+      dockerfile: Dockerfile
+    container_name: nestjs_websocket
+    ports:
+      - 4001:4001
+    environment:
+      APP: "websocket"
+      API_PORT: "3001"
+      WEBSOKCET_PORT: "4001"
+      WEBCLIENT_PORT: "5001"
+      JWT_SECRET: "secret"
+      SALT_ROUNDS: 10
+      DATABASE_HOST: "postgresql"
+      DATABASE_PORT: "5432"
+      DATABASE_USER: "user"
+      DATABASE_PASSWORD: "password"
+      DATABASE_NAME: "todo"
+      CASSANDRA_CONTACT_POINTS: "cassandra"
+      CASSANDRA_DATACENTER: "datacenter1"
+      CASSANDRA_KEYSPACE: "todo_ops"
+      RABBITMQ_URL: "amqp://rabbitmq"
+      RABBITMQ_QUEUE_POST_EDIT: "todo_post_edit_queue"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
 volumes:
   postgres_data:

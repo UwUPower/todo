@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { ApiAppModule } from './api.app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { WebSocketAppModule } from './websocket.app.module';
+import { WsAdapter } from '@nestjs/platform-ws';
 
 async function bootstrapApi() {
   const app = await NestFactory.create(ApiAppModule);
@@ -25,10 +27,38 @@ async function bootstrapApi() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
 
-  await app.listen(3000);
+  const webclientPort = process.env.WEBCLIENT_PORT || '5001';
+
+  // Enable CORS for local frontend development
+  app.enableCors({
+    origin: `http://localhost:${webclientPort}`,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  });
+
+  await app.listen(process.env.WEBSOKCET_POSRT || '3001');
 }
 
+async function bootstrapWebSokcet() {
+  const app = await NestFactory.create(WebSocketAppModule);
+
+  // Use WebSocket adapter
+  app.useWebSocketAdapter(new WsAdapter(app));
+
+  // Enable global validation pipe for DTOs
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
+  await app.listen(process.env.WEBSOKCET_POSRT || '4001');
+}
 
 if (process.env.APP === 'api') {
   bootstrapApi();
+} else if (process.env.APP === 'websocket') {
+  bootstrapWebSokcet();
 }
