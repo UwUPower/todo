@@ -52,8 +52,8 @@ services:
     restart: unless-stopped
   nestjs-app:
     build:
-      context: . 
-      dockerfile: Dockerfile
+      context: ./api             # points to the new api directory
+      dockerfile: Dockerfile     # Dockerfile is inside ./api
     container_name: nestjs_api
     ports:
       - "3000:3000"
