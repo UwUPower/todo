@@ -31,7 +31,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from 'src/user/entities/user.entity';
+import { User } from '../user/entities/user.entity';
 import {
   UpdateTodoRequestDto,
   UpdateTodoResponseDto,

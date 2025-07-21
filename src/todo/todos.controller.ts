@@ -28,11 +28,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from 'src/user/entities/user.entity';
-import {
-  UpdateTodoRequestDto,
-  UpdateTodoResponseDto,
-} from './dto/update-todo.dto';
+import { User } from '../user/entities/user.entity';
 import { GetTodoResponseDto } from './dto/get-todo.dto';
 import { ToDoQueryEnum } from './enums';
 import {

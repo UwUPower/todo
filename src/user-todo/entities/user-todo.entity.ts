@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Todo } from '../../todo/entities/todo.entity';
-import { BaseEntity } from 'src/common/entities/base.entity';
+import { BaseEntity } from '../../common/entities/base.entity';
 
 export enum UserTodoRole {
   OWNER = 'OWNER',

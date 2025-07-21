@@ -12,8 +12,8 @@ import { UserTodoRole } from '../user-todo/entities/user-todo.entity';
 import { UserTodoService } from '../user-todo/user-todo.service';
 import { CreateTodoRequestDto } from './dto/create-todo.dto';
 import { UpdateTodoRequestDto } from './dto/update-todo.dto';
-import { UserService } from 'src/user/user.service';
-import { SortOrderEnum, ToDoQueryEnum, ToDosSortByEnum } from './enums';
+import { UserService } from '../user/user.service';
+import { SortOrderEnum, ToDosSortByEnum } from './enums';
 import { GetTodosRequestDto } from './dto/get-todos.dto';
 import {
   TODO_QUERY_ENUM_DB_FIELD_MAP,

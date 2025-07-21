@@ -1,6 +1,6 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { UserTodo } from '../../user-todo/entities/user-todo.entity';
-import { BaseEntity } from 'src/common/entities/base.entity';
+import { BaseEntity } from '../../common/entities/base.entity';
 
 export enum TodoStatus {
   NOT_STARTED = 'NOT_STARTED',
