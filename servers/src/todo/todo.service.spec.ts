@@ -113,7 +113,7 @@ const mockUpdateTodoRequestDto: UpdateTodoRequestDto = {
 
 describe('TodoService', () => {
   let service: TodoService;
-  let todosRepository: Repository<Todo>;
+  let todoRepository: Repository<Todo>;
   let userService: UserService;
   let userTodoService: UserTodoService;
 
@@ -164,7 +164,7 @@ describe('TodoService', () => {
     }).compile();
 
     service = module.get<TodoService>(TodoService);
-    todosRepository = module.get<Repository<Todo>>(getRepositoryToken(Todo));
+    todoRepository = module.get<Repository<Todo>>(getRepositoryToken(Todo));
     userService = module.get<UserService>(UserService);
     userTodoService = module.get<UserTodoService>(UserTodoService);
 
@@ -192,15 +192,15 @@ describe('TodoService', () => {
 
   describe('create', () => {
     it('should create a new todo and assign owner', async () => {
-      (todosRepository.create as jest.Mock).mockReturnValue(mockTodo);
-      (todosRepository.save as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.create as jest.Mock).mockReturnValue(mockTodo);
+      (todoRepository.save as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.create as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
 
       const result = await service.create(mockCreateTodoRequestDto, mockUserId);
 
-      expect(todosRepository.create).toHaveBeenCalledWith({
+      expect(todoRepository.create).toHaveBeenCalledWith({
         name: mockCreateTodoRequestDto.name,
         description: mockCreateTodoRequestDto.description,
         dueDate: mockCreateTodoRequestDto.dueDate,
@@ -208,7 +208,7 @@ describe('TodoService', () => {
         priority: mockCreateTodoRequestDto.priority,
         attributes: { tags: mockCreateTodoRequestDto.tags },
       });
-      expect(todosRepository.save).toHaveBeenCalledWith(mockTodo);
+      expect(todoRepository.save).toHaveBeenCalledWith(mockTodo);
       expect(userTodoService.create).toHaveBeenCalledWith(
         mockUserId,
         mockTodo.id,
@@ -220,15 +220,15 @@ describe('TodoService', () => {
     it('should create a new todo with empty tags if not provided in DTO', async () => {
       const dtoWithoutTags = { ...mockCreateTodoRequestDto, tags: undefined };
       const todoWithEmptyTags = { ...mockTodo, attributes: { tags: [] } };
-      (todosRepository.create as jest.Mock).mockReturnValue(todoWithEmptyTags);
-      (todosRepository.save as jest.Mock).mockResolvedValue(todoWithEmptyTags);
+      (todoRepository.create as jest.Mock).mockReturnValue(todoWithEmptyTags);
+      (todoRepository.save as jest.Mock).mockResolvedValue(todoWithEmptyTags);
       (userTodoService.create as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
 
       const result = await service.create(dtoWithoutTags, mockUserId);
 
-      expect(todosRepository.create).toHaveBeenCalledWith(
+      expect(todoRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: { tags: [] },
         }),
@@ -239,11 +239,11 @@ describe('TodoService', () => {
 
   describe('update', () => {
     it('should update a todo if user is owner', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
-      (todosRepository.save as jest.Mock).mockResolvedValue({
+      (todoRepository.save as jest.Mock).mockResolvedValue({
         ...mockTodo,
         ...mockUpdateTodoRequestDto,
         attributes: { tags: mockUpdateTodoRequestDto.tags },
@@ -255,14 +255,14 @@ describe('TodoService', () => {
         mockUserId,
       );
 
-      expect(todosRepository.findOne).toHaveBeenCalledWith({
+      expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid, deletedAt: IsNull() },
       });
       expect(userTodoService.findOne).toHaveBeenCalledWith(
         mockUserId,
         mockTodo.id,
       );
-      expect(todosRepository.save).toHaveBeenCalledWith(
+      expect(todoRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           name: mockUpdateTodoRequestDto.name,
           status: mockUpdateTodoRequestDto.status,
@@ -275,11 +275,11 @@ describe('TodoService', () => {
     });
 
     it('should update a todo if user is editor', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoEditor,
       );
-      (todosRepository.save as jest.Mock).mockResolvedValue({
+      (todoRepository.save as jest.Mock).mockResolvedValue({
         ...mockTodo,
         ...mockUpdateTodoRequestDto,
       });
@@ -294,18 +294,18 @@ describe('TodoService', () => {
     });
 
     it('should throw NotFoundException if todo not found', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(undefined);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
         service.update(mockTodoUuid, mockUpdateTodoRequestDto, mockUserId),
       ).rejects.toThrow(NotFoundException);
-      expect(todosRepository.findOne).toHaveBeenCalledWith({
+      expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid, deletedAt: IsNull() },
       });
     });
 
     it('should throw ForbiddenException if user has no permission (viewer)', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoViewer,
       );
@@ -320,7 +320,7 @@ describe('TodoService', () => {
     });
 
     it('should throw ForbiddenException if userTodo relation not found', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
@@ -337,13 +337,13 @@ describe('TodoService', () => {
         ...mockUpdateTodoRequestDto,
         tags: undefined,
       };
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(
         todoWithExistingTags,
       );
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
-      (todosRepository.save as jest.Mock).mockImplementation((todo) =>
+      (todoRepository.save as jest.Mock).mockImplementation((todo) =>
         Promise.resolve(todo),
       ); // Return the saved object
 
@@ -362,13 +362,13 @@ describe('TodoService', () => {
         attributes: { tags: ['existing'] },
       };
       const updateDtoWithEmptyTags = { ...mockUpdateTodoRequestDto, tags: [] };
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(
         todoWithExistingTags,
       );
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
-      (todosRepository.save as jest.Mock).mockImplementation((todo) =>
+      (todoRepository.save as jest.Mock).mockImplementation((todo) =>
         Promise.resolve(todo),
       ); // Return the saved object
 
@@ -384,7 +384,7 @@ describe('TodoService', () => {
 
   describe('findOneByUuid', () => {
     it('should return a todo with default fields if no fields are specified', async () => {
-      (todosRepository.findOne as jest.Mock)
+      (todoRepository.findOne as jest.Mock)
         .mockResolvedValueOnce({ id: mockTodoId }) // For id lookup
         .mockResolvedValueOnce(mockTodo); // For actual todo lookup
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
@@ -393,7 +393,7 @@ describe('TodoService', () => {
 
       const result = await service.findOneByUuid(mockTodoUuid, mockUserId);
 
-      expect(todosRepository.findOne).toHaveBeenCalledWith({
+      expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid },
         select: ['id'],
       });
@@ -401,7 +401,7 @@ describe('TodoService', () => {
         mockUserId,
         mockTodoId,
       );
-      expect(todosRepository.findOne).toHaveBeenCalledWith({
+      expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid },
         select: expect.arrayContaining([
           'uuid',
@@ -429,7 +429,7 @@ describe('TodoService', () => {
         uuid: mockTodo.uuid,
         attributes: { tags: ['tag1', 'tag2'] },
       };
-      (todosRepository.findOne as jest.Mock)
+      (todoRepository.findOne as jest.Mock)
         .mockResolvedValueOnce({ id: mockTodoId })
         .mockResolvedValueOnce(mockTodoWithOnlyRequestedFields);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
@@ -442,7 +442,7 @@ describe('TodoService', () => {
         requestedFields,
       );
 
-      expect(todosRepository.findOne).toHaveBeenCalledWith({
+      expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid },
         select: expect.arrayContaining([
           'name',
@@ -460,12 +460,12 @@ describe('TodoService', () => {
     });
 
     it('should throw NotFoundException if todo UUID not found', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(undefined); // No todo ID found
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined); // No todo ID found
 
       await expect(
         service.findOneByUuid(mockTodoUuid, mockUserId),
       ).rejects.toThrow(NotFoundException);
-      expect(todosRepository.findOne).toHaveBeenCalledWith({
+      expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid },
         select: ['id'],
       });
@@ -473,7 +473,7 @@ describe('TodoService', () => {
     });
 
     it('should throw ForbiddenException if user has no permission', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValueOnce({
+      (todoRepository.findOne as jest.Mock).mockResolvedValueOnce({
         id: mockTodoId,
       });
       (userTodoService.findOne as jest.Mock).mockResolvedValue(undefined); // No userTodo relation
@@ -660,28 +660,28 @@ describe('TodoService', () => {
 
   describe('softDelete', () => {
     it('should soft delete a todo if user is owner', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
-      (todosRepository.softDelete as jest.Mock).mockResolvedValue({
+      (todoRepository.softDelete as jest.Mock).mockResolvedValue({
         affected: 1,
       });
 
       await service.softDelete(mockTodoUuid, mockUserId);
 
-      expect(todosRepository.findOne).toHaveBeenCalledWith({
+      expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid, deletedAt: IsNull() },
       });
       expect(userTodoService.findOne).toHaveBeenCalledWith(
         mockUserId,
         mockTodo.id,
       );
-      expect(todosRepository.softDelete).toHaveBeenCalledWith(mockTodo.id);
+      expect(todoRepository.softDelete).toHaveBeenCalledWith(mockTodo.id);
     });
 
     it('should throw NotFoundException if todo not found', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(undefined);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
         service.softDelete(mockTodoUuid, mockUserId),
@@ -689,7 +689,7 @@ describe('TodoService', () => {
     });
 
     it('should throw ForbiddenException if user is not owner', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoEditor,
       ); // Not owner
@@ -705,7 +705,7 @@ describe('TodoService', () => {
     const invitedUser = { ...mockUser, id: 2, email: invitedUserEmail };
 
     it('should invite a user to a todo if owner has permission and user is not already assigned', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock)
         .mockResolvedValueOnce(mockUserTodoOwner) // Owner permission check
         .mockResolvedValueOnce(undefined); // No existing permission for invited user
@@ -723,7 +723,7 @@ describe('TodoService', () => {
         UserTodoRole.VIEWER,
       );
 
-      expect(todosRepository.findOne).toHaveBeenCalledWith({
+      expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid, deletedAt: IsNull() },
       });
       expect(userTodoService.findOne).toHaveBeenCalledWith(
@@ -743,7 +743,7 @@ describe('TodoService', () => {
     });
 
     it('should throw NotFoundException if todo not found', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(undefined);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
         service.inviteUserToTodo(
@@ -756,7 +756,7 @@ describe('TodoService', () => {
     });
 
     it('should throw ForbiddenException if calling user is not owner', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoEditor,
       ); // Not owner
@@ -772,7 +772,7 @@ describe('TodoService', () => {
     });
 
     it('should throw NotFoundException if invited user not found', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
@@ -789,7 +789,7 @@ describe('TodoService', () => {
     });
 
     it('should throw ConflictException if user is already assigned', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock)
         .mockResolvedValueOnce(mockUserTodoOwner)
         .mockResolvedValueOnce(mockUserTodoViewer); // Existing permission
@@ -812,7 +812,7 @@ describe('TodoService', () => {
     const targetUserTodo = { ...mockUserTodoViewer, userId: targetUser.id };
 
     it('should update user role if calling user is owner', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock)
         .mockResolvedValueOnce(mockUserTodoOwner) // Owner permission check
         .mockResolvedValueOnce(targetUserTodo); // Target user's existing permission
@@ -829,7 +829,7 @@ describe('TodoService', () => {
         UserTodoRole.EDITOR,
       );
 
-      expect(todosRepository.findOne).toHaveBeenCalledWith({
+      expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid, deletedAt: IsNull() },
       });
       expect(userTodoService.findOne).toHaveBeenCalledTimes(1);
@@ -842,7 +842,7 @@ describe('TodoService', () => {
     });
 
     it('should throw NotFoundException if todo not found', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(undefined);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
         service.updateUserRole(
@@ -855,7 +855,7 @@ describe('TodoService', () => {
     });
 
     it('should throw ForbiddenException if calling user is not owner', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoEditor,
       ); // Not owner
@@ -871,7 +871,7 @@ describe('TodoService', () => {
     });
 
     it('should throw NotFoundException if target user not found', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );
@@ -893,7 +893,7 @@ describe('TodoService', () => {
     const targetUser = { ...mockUser, id: 2, email: targetUserEmail };
 
     it('should remove user permission if calling user is owner', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock)
         .mockResolvedValueOnce(mockUserTodoOwner) // Owner permission check
         .mockResolvedValueOnce({
@@ -912,7 +912,7 @@ describe('TodoService', () => {
         targetUserEmail,
       );
 
-      expect(todosRepository.findOne).toHaveBeenCalledWith({
+      expect(todoRepository.findOne).toHaveBeenCalledWith({
         where: { uuid: mockTodoUuid, deletedAt: IsNull() },
       });
       expect(userTodoService.findOne).toHaveBeenCalledWith(
@@ -927,7 +927,7 @@ describe('TodoService', () => {
     });
 
     it('should throw NotFoundException if todo not found', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(undefined);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
         service.removeUserPermissionFromTodo(
@@ -939,7 +939,7 @@ describe('TodoService', () => {
     });
 
     it('should throw ForbiddenException if calling user is not owner', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoEditor,
       ); // Not owner
@@ -954,7 +954,7 @@ describe('TodoService', () => {
     });
 
     it('should throw NotFoundException if target user not found', async () => {
-      (todosRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.findOne as jest.Mock).mockResolvedValue(
         mockUserTodoOwner,
       );

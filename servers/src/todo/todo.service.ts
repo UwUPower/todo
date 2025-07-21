@@ -29,7 +29,7 @@ import {
 export class TodoService {
   constructor(
     @InjectRepository(Todo)
-    private todosRepository: Repository<Todo>,
+    private todoRepository: Repository<Todo>,
     private readonly userService: UserService,
     private readonly userTodoService: UserTodoService,
   ) {}
@@ -38,7 +38,7 @@ export class TodoService {
     createTodoRequestDto: CreateTodoRequestDto,
     userId: number,
   ): Promise<Todo> {
-    const newTodo = this.todosRepository.create({
+    const newTodo = this.todoRepository.create({
       name: createTodoRequestDto.name,
       description: createTodoRequestDto.description,
       dueDate: createTodoRequestDto.dueDate,
@@ -49,7 +49,7 @@ export class TodoService {
         : { tags: [] },
     });
 
-    const createdTodo = await this.todosRepository.save(newTodo);
+    const createdTodo = await this.todoRepository.save(newTodo);
 
     await this.userTodoService.create(
       userId,
@@ -65,7 +65,7 @@ export class TodoService {
     updateRequestTodoDto: UpdateTodoRequestDto,
     userId: number,
   ): Promise<Todo> {
-    const todo = await this.todosRepository.findOne({
+    const todo = await this.todoRepository.findOne({
       where: { uuid, deletedAt: IsNull() },
     });
     if (!todo) {
@@ -96,7 +96,7 @@ export class TodoService {
           : { tags: todo.attributes.tags },
     };
 
-    const updatedTodo = await this.todosRepository.save(todoToBeUpdated);
+    const updatedTodo = await this.todoRepository.save(todoToBeUpdated);
     return updatedTodo;
   }
   async findOneByUuid(
@@ -104,7 +104,7 @@ export class TodoService {
     userId: number,
     fields: string[] = [],
   ): Promise<Partial<Todo>> {
-    const todoIdObject = await this.todosRepository.findOne({
+    const todoIdObject = await this.todoRepository.findOne({
       where: { uuid },
       select: ['id'],
     });
@@ -148,7 +148,7 @@ export class TodoService {
     // Remove duplicates
     const finalSelectFields = Array.from(new Set(selectFields));
 
-    const todo = await this.todosRepository.findOne({
+    const todo = await this.todoRepository.findOne({
       where: { uuid },
       select: finalSelectFields,
     });
@@ -180,7 +180,7 @@ export class TodoService {
 
     const skip = (page - 1) * limit;
 
-    const queryBuilder = this.todosRepository.createQueryBuilder('todo');
+    const queryBuilder = this.todoRepository.createQueryBuilder('todo');
 
     queryBuilder
       .innerJoin(
@@ -290,7 +290,7 @@ export class TodoService {
   }
 
   async softDelete(uuid: string, userId: number): Promise<void> {
-    const todo = await this.todosRepository.findOne({
+    const todo = await this.todoRepository.findOne({
       where: { uuid, deletedAt: IsNull() },
     });
     if (!todo) {
@@ -304,7 +304,7 @@ export class TodoService {
       );
     }
 
-    await this.todosRepository.softDelete(todo.id);
+    await this.todoRepository.softDelete(todo.id);
   }
 
   async inviteUserToTodo(
@@ -313,7 +313,7 @@ export class TodoService {
     invitedUserEmail: string,
     role: UserTodoRole,
   ): Promise<void> {
-    const todo = await this.todosRepository.findOne({
+    const todo = await this.todoRepository.findOne({
       where: { uuid: todoUuid, deletedAt: IsNull() },
     });
     if (!todo) {
@@ -353,7 +353,7 @@ export class TodoService {
     targetUserEmail: string,
     newRole: UserTodoRole,
   ): Promise<void> {
-    const todo = await this.todosRepository.findOne({
+    const todo = await this.todoRepository.findOne({
       where: { uuid: todoUuid, deletedAt: IsNull() },
     });
     if (!todo) {
@@ -382,7 +382,7 @@ export class TodoService {
     userId: number,
     targetUserEmail: string,
   ): Promise<void> {
-    const todo = await this.todosRepository.findOne({
+    const todo = await this.todoRepository.findOne({
       where: { uuid: todoUuid, deletedAt: IsNull() },
     });
     if (!todo) {
@@ -407,14 +407,14 @@ export class TodoService {
   }
 
   async findOneByUuidForWebSocket(uuid: string) {
-    const todo = await this.todosRepository.findOne({
+    const todo = await this.todoRepository.findOne({
       where: { uuid, deletedAt: IsNull() },
     });
     return todo;
   }
 
   async findOneUserRole(todoUuid: string, userId: number) {
-    const todoIdObject = await this.todosRepository.findOne({
+    const todoIdObject = await this.todoRepository.findOne({
       where: { uuid: todoUuid },
       select: ['id'],
     });
@@ -440,11 +440,11 @@ export class TodoService {
     todoId: number,
     newDescription: string,
   ): Promise<Todo> {
-    const todo = await this.todosRepository.findOne({ where: { id: todoId } });
+    const todo = await this.todoRepository.findOne({ where: { id: todoId } });
     if (!todo) {
       throw new NotFoundException(`Todo with ID ${todoId} not found.`);
     }
     todo.description = newDescription;
-    return this.todosRepository.save(todo);
+    return this.todoRepository.save(todo);
   }
 }
