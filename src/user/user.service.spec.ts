@@ -3,7 +3,7 @@ import { UserService } from './user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { CreateUserRequestDto } from './dto/create-user.dto';
+import { CreateUserRequestDto } from './dtos/create-user.dto';
 import { BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';

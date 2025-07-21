@@ -7,12 +7,8 @@ import {
   IsDateString,
   IsArray,
 } from 'class-validator';
-import {
-  TodoStatusEnum,
-  TodoPriorityEnum,
-  Tags,
-} from '../entities/todo.entity';
-import { Exclude, Expose, Transform } from 'class-transformer';
+import { Exclude } from 'class-transformer';
+import { TodoStatusEnum, TodoPriorityEnum } from '../enums';
 
 export class CreateTodoRequestDto {
   @ApiProperty({

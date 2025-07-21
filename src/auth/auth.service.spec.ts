@@ -4,7 +4,7 @@ import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { LoginRequestDto } from './dto/login.dto';
+import { LoginRequestDto } from './dtos/login.dto';
 
 jest.mock('bcrypt', () => ({
   compare: jest.fn(),

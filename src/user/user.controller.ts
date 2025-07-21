@@ -9,7 +9,7 @@ import { UserService } from './user.service';
 import {
   CreateUserRequestDto,
   CreateUserResponseDto,
-} from './dto/create-user.dto';
+} from './dtos/create-user.dto';
 import { plainToInstance } from 'class-transformer';
 import { ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger'; // Import Swagger decorators
 

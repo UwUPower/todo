@@ -19,7 +19,7 @@ import { TodoService } from './todo.service';
 import {
   CreateTodoRequestDto,
   CreateTodoResponseDto,
-} from './dto/create-todo.dto';
+} from './dtos/create-todo.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
 import { plainToInstance } from 'class-transformer';
@@ -35,12 +35,12 @@ import { User } from '../user/entities/user.entity';
 import {
   UpdateTodoRequestDto,
   UpdateTodoResponseDto,
-} from './dto/update-todo.dto';
-import { GetTodoResponseDto } from './dto/get-todo.dto';
+} from './dtos/update-todo.dto';
+import { GetTodoResponseDto } from './dtos/get-todo.dto';
 import { ToDoQueryEnum } from './enums';
-import { InviteUserRequestDto } from './dto/invite-user.dto';
-import { UpdateUserRoleRequestDto } from './dto/update-user-role.dto';
-import { RemoveUserPermissionRequestDto } from './dto/romve-user-permission.dto';
+import { InviteUserRequestDto } from './dtos/invite-user.dto';
+import { UpdateUserRoleRequestDto } from './dtos/update-user-role.dto';
+import { RemoveUserPermissionRequestDto } from './dtos/romve-user-permission.dto';
 
 @ApiTags('Todo')
 @ApiBearerAuth('JWT-auth')

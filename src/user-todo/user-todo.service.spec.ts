@@ -5,11 +5,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserTodo, UserTodoRole } from './entities/user-todo.entity';
 import { NotFoundException } from '@nestjs/common';
-import {
-  Todo,
-  TodoPriorityEnum,
-  TodoStatusEnum,
-} from '../todo/entities/todo.entity';
+import { Todo } from '../todo/entities/todo.entity';
+import { TodoStatusEnum, TodoPriorityEnum } from '../todo/enums';
 
 describe('UserTodoService', () => {
   let service: UserTodoService;

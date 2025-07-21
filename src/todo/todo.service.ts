@@ -7,14 +7,19 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
-import { Todo, TodoStatusEnum, TodoPriorityEnum } from './entities/todo.entity';
+import { Todo } from './entities/todo.entity';
 import { UserTodoRole } from '../user-todo/entities/user-todo.entity';
 import { UserTodoService } from '../user-todo/user-todo.service';
-import { CreateTodoRequestDto } from './dto/create-todo.dto';
-import { UpdateTodoRequestDto } from './dto/update-todo.dto';
+import { CreateTodoRequestDto } from './dtos/create-todo.dto';
+import { UpdateTodoRequestDto } from './dtos/update-todo.dto';
 import { UserService } from '../user/user.service';
-import { SortOrderEnum, ToDosSortByEnum } from './enums';
-import { GetTodosRequestDto } from './dto/get-todos.dto';
+import {
+  SortOrderEnum,
+  TodoPriorityEnum,
+  ToDosSortByEnum,
+  TodoStatusEnum,
+} from './enums';
+import { GetTodosRequestDto } from './dtos/get-todos.dto';
 import {
   TODO_QUERY_ENUM_DB_FIELD_MAP,
   TODO_SORT_BY_ENUM_DB_FIELD_MAP,

@@ -1,18 +1,7 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { UserTodo } from '../../user-todo/entities/user-todo.entity';
 import { BaseEntity } from '../../common/entities/base.entity';
-
-export enum TodoStatusEnum {
-  NOT_STARTED = 'NOT_STARTED',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
-}
-
-export enum TodoPriorityEnum {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-}
+import { TodoStatusEnum, TodoPriorityEnum } from '../enums';
 
 export interface Tags {
   tags: string[];

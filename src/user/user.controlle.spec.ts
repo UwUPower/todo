@@ -5,7 +5,7 @@ import { UserService } from './user.service';
 import {
   CreateUserRequestDto,
   CreateUserResponseDto,
-} from './dto/create-user.dto';
+} from './dtos/create-user.dto';
 import { BadRequestException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 

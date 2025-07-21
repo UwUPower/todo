@@ -4,9 +4,9 @@ import { TodoService } from './todo.service';
 import { Request } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
-import { GetTodoResponseDto } from './dto/get-todo.dto';
+import { GetTodoResponseDto } from './dtos/get-todo.dto';
 import { SortOrderEnum, ToDoQueryEnum, ToDosSortByEnum } from './enums';
-import { GetTodosRequestDto } from './dto/get-todos.dto';
+import { GetTodosRequestDto } from './dtos/get-todos.dto';
 
 // Mock the JwtAuthGuard to allow requests to proceed without actual JWT validation
 jest.mock('../auth/jwt-auth.guard', () => ({

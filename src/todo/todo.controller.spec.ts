@@ -4,16 +4,16 @@ import { TodoService } from './todo.service';
 import {
   CreateTodoRequestDto,
   CreateTodoResponseDto,
-} from './dto/create-todo.dto';
+} from './dtos/create-todo.dto';
 import {
   UpdateTodoRequestDto,
   UpdateTodoResponseDto,
-} from './dto/update-todo.dto';
-import { GetTodoResponseDto } from './dto/get-todo.dto';
-import { ToDoQueryEnum } from './enums';
-import { InviteUserRequestDto } from './dto/invite-user.dto';
-import { UpdateUserRoleRequestDto } from './dto/update-user-role.dto';
-import { RemoveUserPermissionRequestDto } from './dto/romve-user-permission.dto';
+} from './dtos/update-todo.dto';
+import { GetTodoResponseDto } from './dtos/get-todo.dto';
+import { TodoPriorityEnum, ToDoQueryEnum, TodoStatusEnum } from './enums';
+import { InviteUserRequestDto } from './dtos/invite-user.dto';
+import { UpdateUserRoleRequestDto } from './dtos/update-user-role.dto';
+import { RemoveUserPermissionRequestDto } from './dtos/romve-user-permission.dto';
 import {
   BadRequestException,
   ForbiddenException,
@@ -23,7 +23,6 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { Request } from 'express';
 import { UserTodoRole } from '../user-todo/entities/user-todo.entity'; // Assuming this path is correct
-import { TodoPriorityEnum, TodoStatusEnum } from './entities/todo.entity';
 
 describe('TodoController', () => {
   let controller: TodoController;

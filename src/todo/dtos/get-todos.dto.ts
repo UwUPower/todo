@@ -1,8 +1,12 @@
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString, IsInt, Min, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
-import { TodoStatusEnum, TodoPriorityEnum } from '../entities/todo.entity';
-import { SortOrderEnum, ToDosSortByEnum } from '../enums';
+import {
+  SortOrderEnum,
+  TodoPriorityEnum,
+  ToDosSortByEnum,
+  TodoStatusEnum,
+} from '../enums';
 import { GetTodoResponseDto } from './get-todo.dto';
 
 export class GetTodosRequestDto {

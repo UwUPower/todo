@@ -1,6 +1,6 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginRequestDto, LoginResponseDto } from './dto/login.dto';
+import { LoginRequestDto, LoginResponseDto } from './dtos/login.dto';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 

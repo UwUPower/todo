@@ -14,12 +14,12 @@ import { Request } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '../user/entities/user.entity';
-import { GetTodoResponseDto } from './dto/get-todo.dto';
+import { GetTodoResponseDto } from './dtos/get-todo.dto';
 import { ToDoQueryEnum } from './enums';
 import {
   GetTodosRequestDto,
   PaginatedTodosResponseDto,
-} from './dto/get-todos.dto';
+} from './dtos/get-todos.dto';
 
 @ApiTags('Todos')
 @ApiBearerAuth('JWT-auth')

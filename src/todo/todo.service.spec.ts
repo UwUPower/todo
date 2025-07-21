@@ -1,20 +1,25 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TodoService } from './todo.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder, IsNull } from 'typeorm';
-import { Todo, TodoPriorityEnum, TodoStatusEnum } from './entities/todo.entity';
+import { Repository, IsNull } from 'typeorm';
+import { Todo } from './entities/todo.entity';
 import { UserTodoService } from '../user-todo/user-todo.service';
 import { UserService } from '../user/user.service';
 import { UserTodoRole } from '../user-todo/entities/user-todo.entity';
-import { CreateTodoRequestDto } from './dto/create-todo.dto';
-import { UpdateTodoRequestDto } from './dto/update-todo.dto';
-import { GetTodosRequestDto } from './dto/get-todos.dto';
+import { CreateTodoRequestDto } from './dtos/create-todo.dto';
+import { UpdateTodoRequestDto } from './dtos/update-todo.dto';
+import { GetTodosRequestDto } from './dtos/get-todos.dto';
 import {
   ForbiddenException,
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import { SortOrderEnum, ToDosSortByEnum } from './enums';
+import {
+  SortOrderEnum,
+  TodoPriorityEnum,
+  ToDosSortByEnum,
+  TodoStatusEnum,
+} from './enums';
 
 // Mock Constants (as they are external to the service logic being tested)
 const MOCK_TODO_QUERY_ENUM_DB_FIELD_MAP = {
