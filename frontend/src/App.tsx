@@ -73,6 +73,96 @@ class OTClient {
     this.onError = onError;
   }
 
+  private transform(opA: Operation, opB: Operation): [Operation, Operation] {
+    let newOpA = { ...opA };
+    let newOpB = { ...opB };
+
+    // Case 1: opA is Insert, opB is Insert
+    if (opA.type === 'insert' && opB.type === 'insert') {
+      if (opA.position < opB.position) {
+        newOpB.position += (opA.text?.length || 0);
+      } else if (opB.position < opA.position) {
+        newOpA.position += (opB.text?.length || 0);
+      } else { // opA.position === opB.position
+        // Tie-breaking rule: if positions are equal, the remote op (opB) shifts after local (opA)
+        // This is a common tie-breaking rule to ensure deterministic outcomes.
+        newOpB.position += (opA.text?.length || 0);
+      }
+    }
+    // Case 2: opA is Delete, opB is Insert
+    else if (opA.type === 'delete' && opB.type === 'insert') {
+      // If opA's deletion range affects opB's insertion position
+      if (opA.position <= opB.position) {
+        newOpB.position -= Math.min(opB.position - opA.position, opA.length || 0);
+      }
+      // If opB's insertion position is within opA's deletion range, opB is effectively deleted.
+      // This simplified transform doesn't nullify ops, just adjusts positions.
+      if (newOpB.position < 0) newOpB.position = 0;
+    }
+    // Case 3: opA is Insert, opB is Delete
+    else if (opA.type === 'insert' && opB.type === 'delete') {
+      // If opB's deletion range affects opA's insertion position
+      if (opB.position <= opA.position) {
+        newOpA.position -= Math.min(opA.position - opB.position, opB.length || 0);
+      }
+      // If opA's insertion point is within opB's deletion range, opA effectively gets deleted.
+      // This simplified transform doesn't nullify ops, just adjusts positions.
+      if (newOpA.position < 0) newOpA.position = 0;
+    }
+    // Case 4: Both are Deletes
+    else if (opA.type === 'delete' && opB.type === 'delete') {
+      // Adjust positions
+      if (opA.position < opB.position) {
+        newOpB.position -= Math.min(opB.position - opA.position, opA.length || 0);
+      } else if (opB.position < opA.position) {
+        newOpA.position -= Math.min(opA.position - opB.position, opB.length || 0);
+      }
+
+      // Handle overlapping deletions (most complex part for deletes):
+      // If opA deletes content that opB also deletes, opB's length might need to be reduced.
+      // If opB deletes content that opA also deletes, opA's length might need to be reduced.
+      // This simplified transform focuses on position adjustment.
+      // A robust OT would handle splitting/merging operations or nullifying them if fully consumed.
+
+      // Example of handling overlap for length (still simplified):
+      // Calculate overlap start and end
+      const opA_start = opA.position;
+      const opA_end = opA.position + (opA.length || 0);
+      const opB_start = opB.position;
+      const opB_end = opB.position + (opB.length || 0);
+
+      const overlap_start = Math.max(opA_start, opB_start);
+      const overlap_end = Math.min(opA_end, opB_end);
+      const overlap_length = Math.max(0, overlap_end - overlap_start);
+
+      if (overlap_length > 0) {
+        // If opA starts before opB, and they overlap, opB's effective length is reduced
+        // by the part of opA that overlaps with opB's start.
+        if (opA.position < opB.position) {
+          newOpB.length = Math.max(0, (opB.length || 0) - overlap_length);
+        }
+        // If opB starts before opA, and they overlap, opA's effective length is reduced
+        // by the part of opB that overlaps with opA's start.
+        else if (opB.position < opA.position) {
+          newOpA.length = Math.max(0, (opA.length || 0) - overlap_length);
+        }
+        // If they start at the same position, a tie-breaking rule is needed.
+        // For simplicity, we assume the remote op (opB) gets priority in consuming the overlap.
+        else { // opA.position === opB.position
+          newOpB.length = Math.max(0, (opB.length || 0) - (opA.length || 0));
+          newOpA.length = 0; // opA is consumed by opB if they start at same place
+        }
+      }
+
+      // Ensure positions are not negative
+      if (newOpA.position < 0) newOpA.position = 0;
+      if (newOpB.position < 0) newOpB.position = 0;
+    }
+
+    return [newOpA, newOpB];
+  }
+
+
   connect(todoUuid: string, accessToken: string, userId: string) {
     if (this.ws) {
       this.ws.close();
@@ -103,31 +193,48 @@ class OTClient {
         const remoteOp: Operation = data.operation;
         const remoteRevision = data.revision;
 
-        // 1. Transform pending local operations against the incoming remote operation
-        let transformedRemoteOp = remoteOp;
-        let newPendingOps: Operation[] = [];
-        for (const localOp of this.pendingOps) {
-          // Simplified transformation: assuming remote op comes before local op
-          // For this example, we'll just re-apply local ops after remote.
-          // For a true OT implementation, this is the complex part.
-          // For now, we'll just apply remote, and then re-apply pending local ops if any.
-          // This is NOT a full OT algorithm for concurrent changes, but a basic demo.
-          // A proper OT would transform pendingOps against remoteOp.
+        // --- START OF IMPLEMENTED OT CLIENT-SIDE TRANSFORMATION ---
+        // This is a simplified OT implementation. A full OT library would be more robust.
+
+        // 1. Filter out acknowledged pending operations
+        // A real OT would match by opId, but for this demo, we assume the first pending op
+        // is the one acknowledged if its revision matches the remote op's revision.
+        // This part needs to be careful if multiple ops are sent quickly and acknowledged out of order.
+        // For a robust system, each sent op should have a unique ID, and acknowledgment should clear by ID.
+        // For this demo, we assume FIFO acknowledgment.
+        let acknowledged = false;
+        if (this.pendingOps.length > 0 && this.pendingOps[0].revision === remoteOp.revision) {
+            this.pendingOps.shift(); // Remove the acknowledged operation
+            acknowledged = true;
         }
+
+        let transformedRemoteOp = { ...remoteOp };
+        let newPendingOps: Operation[] = [];
+
+        // Transform remoteOp against all remaining pendingOps
+        // And transform each localOp against the original remoteOp
+        for (const localOp of this.pendingOps) {
+          // Perform transformation: [transformedLocalOp, transformedRemoteOp] = transform(localOp, remoteOp)
+          const [transformedLocal, transformedRemote] = this.transform(localOp, transformedRemoteOp);
+          transformedRemoteOp = transformedRemote; // Update remote op for next transformation
+          newPendingOps.push(transformedLocal); // Add transformed local op to new pending list
+        }
+        this.pendingOps = newPendingOps; // Update pending ops with transformed versions
+
+        // --- END OF IMPLEMENTED OT CLIENT-SIDE TRANSFORMATION ---
+
 
         // 2. Apply the (potentially transformed) remote operation to the local document
         this.document = this.applyOperation(this.document, transformedRemoteOp);
         this.revision = remoteRevision; // Update client's revision to server's latest
 
-        // 3. Re-apply pending local operations if any (simplified)
-        // In a full OT, pendingOps would have been transformed in step 1.
-        // For this demo, we'll just apply them sequentially.
+        // 3. Re-apply pending local operations
+        // These are the local operations that were transformed in step 1.
         let tempDoc = this.document;
-        for (const op of newPendingOps) {
+        for (const op of this.pendingOps) { // Use the updated this.pendingOps
             tempDoc = this.applyOperation(tempDoc, op);
         }
         this.document = tempDoc;
-        this.pendingOps = newPendingOps; // Update pending ops after transformation
 
         this.onUpdate(this.document);
       }
@@ -143,7 +250,6 @@ class OTClient {
       this.onError(error);
     };
   }
-
   disconnect() {
     if (this.ws) {
       this.ws.close();
