@@ -79,29 +79,19 @@ open it in a web browser, username: guest, password: guest
 http://localhost:15672/
 ```
 
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
 ### Run tests
 
 #### run unit test
 ```
 cd server
+npm install
 npm run test
 ```
 
 #### run unit test with coverage report
 ```
 cd server
+npm install
 npm run test:cov
 ```
 
@@ -109,6 +99,7 @@ npm run test:cov
 start the database and api server first
 ```
 pip install request
+python integration_test.py
 
 ```
 
