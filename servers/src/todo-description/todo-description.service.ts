@@ -124,7 +124,7 @@ export class TodoDescriptionService {
         return false;
       }
 
-      const todo = await this.todoService.getUserByUuidForWebSocket(todoUuid);
+      const todo = await this.todoService.getTodoByUuidForWebSocket(todoUuid);
       if (!todo) {
         this.logger.warn(`WS Auth failed: Todo not found for UUID ${todoUuid}`);
         ws.close(1008, 'Unauthorized: Todo not found');

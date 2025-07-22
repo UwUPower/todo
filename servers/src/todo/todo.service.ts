@@ -425,7 +425,7 @@ export class TodoService {
     await this.userTodoService.removeUserPermission(targetUser.id, todo.id);
   }
 
-  async getUserByUuidForWebSocket(uuid: string) {
+  async getTodoByUuidForWebSocket(uuid: string) {
     const todo = await this.todoRepository.findOne({
       where: { uuid, deletedAt: IsNull() },
     });
