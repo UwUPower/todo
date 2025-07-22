@@ -79,6 +79,9 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      cassandra:
+        condition: service_healthy
+    restart: unless-stopped
 
   web-socket:
     build:
@@ -109,7 +112,10 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
+      cassandra:
+        condition: service_healthy
+    restart: unless-stopped
+    
 volumes:
   postgres_data:
   cassandra_data:
