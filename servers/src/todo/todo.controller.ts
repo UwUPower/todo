@@ -266,12 +266,12 @@ export class TodoController {
       'Forbidden: User does not have permission to access this todo.',
   })
   @ApiResponse({ status: 404, description: 'Todo not found.' })
-  async findOneUserRole(
+  async getTodoUserRole(
     @Param('uuid') uuid: string,
     @Req() req: Request,
   ): Promise<GetUserTodoRoleResponseDto> {
     const user = req.user as User;
-    const todoPartial = await this.todoService.findOneUserRole(uuid, user.id);
+    const todoPartial = await this.todoService.getTodoUserRole(uuid, user.id);
     return plainToInstance(GetUserTodoRoleResponseDto, todoPartial);
   }
 

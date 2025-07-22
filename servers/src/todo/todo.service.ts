@@ -432,7 +432,7 @@ export class TodoService {
     return todo;
   }
 
-  async findOneUserRole(todoUuid: string, userId: number) {
+  async getTodoUserRole(todoUuid: string, userId: number) {
     const todoIdObject = await this.todoRepository.findOne({
       where: { uuid: todoUuid },
       select: ['id'],
