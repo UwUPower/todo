@@ -203,6 +203,7 @@ export class TodoController {
     status: 409,
     description: 'User already assigned to this todo.',
   })
+  @HttpCode(HttpStatus.OK)
   async inviteUserToTodo(
     @Param('uuid') todoUuid: string,
     @Body() inviteUserRequestDto: InviteUserRequestDto,
