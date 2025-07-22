@@ -23,6 +23,7 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { Request } from 'express';
 import { UserTodoRole } from '../user-todo/entities/user-todo.entity';
+import { GetUserTodoRoleResponseDto } from './dtos/get-todo-user-role.dto';
 
 describe('TodoController', () => {
   let controller: TodoController;
@@ -59,6 +60,10 @@ describe('TodoController', () => {
     attributes: { tags: ['tag1', 'tag2'] },
     createdAt: new Date(),
     updatedAt: new Date(),
+  };
+
+  const mockTodoUserRole = {
+    role: UserTodoRole.EDITOR,
   };
 
   const mockCreateTodoRequestDto: CreateTodoRequestDto = {
@@ -102,6 +107,7 @@ describe('TodoController', () => {
             softDelete: jest.fn(),
             inviteUserToTodo: jest.fn(),
             updateUserRole: jest.fn(),
+            getTodoUserRole: jest.fn(),
             removeUserPermissionFromTodo: jest.fn(),
           },
         },
@@ -399,6 +405,35 @@ describe('TodoController', () => {
           req,
         ),
       ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  // --- Get User Role on Todo ---
+  describe('getTodoUserRole', () => {
+    it('should get a todo user role', async () => {
+      (todoService.getTodoUserRole as jest.Mock).mockResolvedValue(
+        mockTodoUserRole,
+      );
+
+      const result = await controller.getTodoUserRole(mockTodoUuid, req);
+
+      expect(todoService.getTodoUserRole).toHaveBeenCalledWith(
+        mockTodoUuid,
+        mockUser.id,
+      );
+      expect(result).toEqual(
+        plainToInstance(GetUserTodoRoleResponseDto, mockTodoUserRole),
+      );
+    });
+
+    it('should throw NotFoundException if todo or target user not found', async () => {
+      (todoService.getTodoUserRole as jest.Mock).mockRejectedValue(
+        new NotFoundException('Todo or target user not found for this todo.'),
+      );
+
+      await expect(
+        controller.getTodoUserRole(mockTodoUuid, req),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 

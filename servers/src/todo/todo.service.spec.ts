@@ -5,7 +5,7 @@ import { Repository, IsNull } from 'typeorm';
 import { Todo } from './entities/todo.entity';
 import { UserTodoService } from '../user-todo/user-todo.service';
 import { UserService } from '../user/user.service';
-import { UserTodoRole } from '../user-todo/entities/user-todo.entity';
+import { UserTodo, UserTodoRole } from '../user-todo/entities/user-todo.entity';
 import { CreateTodoRequestDto } from './dtos/create-todo.dto';
 import { UpdateTodoRequestDto } from './dtos/update-todo.dto';
 import { GetTodosRequestDto } from './dtos/get-todos.dto';
@@ -399,7 +399,7 @@ describe('TodoService', () => {
     });
   });
 
-  describe('getUserByUuid', () => {
+  describe('getAuthorizedTodo', () => {
     it('should return a todo with default fields if no fields are specified', async () => {
       (todoRepository.findOne as jest.Mock)
         .mockResolvedValueOnce({ id: mockTodoId }) // For id lookup
@@ -510,7 +510,7 @@ describe('TodoService', () => {
     });
   });
 
-  describe('findAll', () => {
+  describe('getAuthorizedTodos', () => {
     const mockListTodosDto: GetTodosRequestDto = {
       page: 1,
       limit: 10,
@@ -683,7 +683,7 @@ describe('TodoService', () => {
     });
   });
 
-  describe('softDelete', () => {
+  describe('softDeleteTodo', () => {
     it('should soft delete a todo if user is owner', async () => {
       (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
       (userTodoService.getTodoByUserIdAndTodoId as jest.Mock).mockResolvedValue(
@@ -909,6 +909,39 @@ describe('TodoService', () => {
           targetUserEmail,
           UserTodoRole.EDITOR,
         ),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getTodoUserRole', () => {
+    it('should get user role', async () => {
+      (
+        userTodoService.getTodoByUserIdAndTodoId as jest.Mock
+      ).mockResolvedValueOnce({
+        ...mockTodo,
+        role: UserTodoRole.EDITOR,
+      });
+
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(mockTodo);
+
+      const { role } = await todoService.getTodoUserRole(
+        mockTodoUuid,
+        mockUserId,
+      );
+
+      expect(userTodoService.getTodoByUserIdAndTodoId).toHaveBeenCalledTimes(1);
+      expect(userTodoService.getTodoByUserIdAndTodoId).toHaveBeenCalledWith(
+        mockUserId,
+        mockTodoId,
+      );
+      expect(role).toEqual(UserTodoRole.EDITOR);
+    });
+
+    it('should throw NotFoundException if todo not found', async () => {
+      (todoRepository.findOne as jest.Mock).mockResolvedValue(undefined);
+
+      await expect(
+        todoService.getTodoUserRole(mockTodoUuid, mockUserId),
       ).rejects.toThrow(NotFoundException);
     });
   });
