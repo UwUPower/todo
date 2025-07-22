@@ -3,7 +3,8 @@ In my tech stack, TypeScript with Nestjs is the closest to C# ASP.NET
 - Strong type language
 - Built-in dependency injection
 - Built-in MVC pattern
-- 
+- DTO with data anotations
+
 https://docs.nestjs.com/
 
 # Architectural diagram
